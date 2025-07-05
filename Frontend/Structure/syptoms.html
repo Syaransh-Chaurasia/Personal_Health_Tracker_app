@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Symptom Logger</title>
+  <link rel="stylesheet" href="static/index.css" />
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="medication.html">Medications</a></li>
+    <li><a href="symptom.html">Symptoms</a></li>
+    <li><a href="vitals.html">Vitals</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Symptom Logger</h1>
+  <form id="sym-form">
+    <div class="form-group"><label>Type: <input type="text" id="type" required></label></div>
+    <div class="form-group"><label>Severity (1–10): <input type="number" id="severity" min="1" max="10" required></label></div>
+    <div class="form-group"><label>Notes: <input type="text" id="notes"></label></div>
+    <div class="form-group"><label>Date: <input type="date" id="date" required></label></div>
+    <button class="btn" type="submit">Log Symptom</button>
+  </form>
+
+  <ul id="sym-list" style="text-align:left;"></ul>
+</main>
+
+<script>
+  const API = "http://localhost:8000/symptoms";
+
+  document.getElementById("sym-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = {
+      symptom_type: type.value,
+      severity: parseInt(severity.value),
+      notes: notes.value,
+      date: date.value
+    };
+    await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    loadSymptoms();
+    e.target.reset();
+  });
+
+  async function loadSymptoms() {
+    const res = await fetch(API);
+    const symptoms = await res.json();
+    const list = document.getElementById("sym-list");
+    list.innerHTML = "";
+    symptoms.forEach(s => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${s.symptom_type}</strong> – Severity: ${s.severity} <br>${s.date} - ${s.notes}
+      <button onclick="del(${s.id})">Delete</button>`;
+      list.appendChild(li);
+    });
+  }
+
+  async function del(id) {
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    loadSymptoms();
+  }
+
+  loadSymptoms();
+</script>
+
+</body>
+</html>

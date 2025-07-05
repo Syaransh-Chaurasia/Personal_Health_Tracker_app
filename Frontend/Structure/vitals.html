@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Vitals Recorder</title>
+    <link rel="stylesheet" href="static/index.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Navigation</h2>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="medication.html">Medications</a></li>
+        <li><a href="symptom.html">Symptoms</a></li>
+        <li><a href="vitals.html">Vitals</a></li>
+    </ul>
+</div>
+
+<main>
+    <h1>Vitals Recorder</h1>
+    <form id="vital-form">
+        <div class="form-group"><label>Type: <input type="text" id="type" required></label></div>
+        <div class="form-group"><label>Value: <input type="text" id="value" required></label></div>
+        <div class="form-group"><label>Unit: <input type="text" id="unit" required></label></div>
+        <div class="form-group"><label>Notes: <input type="text" id="notes"></label></div>
+        <div class="form-group"><label>Date & Time: <input type="datetime-local" id="recorded_at" required></label></div>
+        <button class="btn" type="submit">Save Vital</button>
+    </form>
+
+    <canvas id="vitalChart" width="400" height="200"></canvas>
+    <ul id="vital-list" style="text-align:left;"></ul>
+</main>
+
+<script>
+    const API = "http://localhost:8000/vitals";
+    let chart;
+
+    document.getElementById("vital-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+            type: type.value,
+            value: value.value,
+            unit: unit.value,
+            notes: notes.value,
+            recorded_at: recorded_at.value
+        };
+        await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        loadVitals();
+        e.target.reset();
+    });
+
+    async function loadVitals() {
+        const res = await fetch(API);
+        const vitals = await res.json();
+        const list = document.getElementById("vital-list");
+        list.innerHTML = "";
+
+        const labels = [];
+        const values = [];
+
+        vitals.forEach(v => {
+            labels.push(new Date(v.recorded_at).toLocaleString());
+            values.push(parseFloat(v.value));
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${v.type}</strong>: ${v.value} ${v.unit} <br>${v.recorded_at}
+      <button onclick="del(${v.id})">Delete</button>`;
+            list.appendChild(li);
+        });
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('vitalChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Vitals Trend',
+                    data: values,
+                    borderColor: 'rgba(75,192,192,1)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    async function del(id) {
+        await fetch(`${API}/${id}`, { method: "DELETE" });
+        loadVitals();
+    }
+
+    loadVitals();
+</script>
+
+</body>
+</html>
