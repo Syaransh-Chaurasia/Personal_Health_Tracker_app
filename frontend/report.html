@@ -80,9 +80,9 @@
 
   async function loadReports() {
     const [medRes, symRes, vitRes] = await Promise.all([
-      fetch('https://personal-health-tracker-app-4.onrender.com/medications'),
-      fetch('https://personal-health-tracker-app-4.onrender.com/symptoms'),
-      fetch('https://personal-health-tracker-app-4.onrender.com/vitals')
+      fetch('https://personal-health-tracker-app-7.onrender.com/medications'),
+      fetch('https://personal-health-tracker-app-7.onrender.com/symptoms'),
+      fetch('https://personal-health-tracker-app-7.onrender.com/vitals')
     ]);
 
     const meds = await medRes.json();
