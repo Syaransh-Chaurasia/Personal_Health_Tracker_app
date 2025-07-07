@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class VitalsBase(BaseModel):
     type: str
-    value: str
+    value: float
     unit: str
     recorded_at: datetime
-    notes: str = ""
+    notes: Optional[str] = None
 
 class VitalsCreate(VitalsBase):
     pass
@@ -16,6 +17,5 @@ class VitalsUpdate(VitalsBase):
 
 class VitalsOut(VitalsBase):
     id: int
-
     class Config:
         orm_mode = True

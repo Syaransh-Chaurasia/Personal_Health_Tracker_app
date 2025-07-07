@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import medication, symptom, vitals
-from database import Base, engine
+from backend.database import Base, engine
+from backend.routers import medication, symptom, vitals, user
 
 app = FastAPI(title="Personal Health Tracker")
 
@@ -18,7 +18,8 @@ Base.metadata.create_all(bind=engine)
 app.include_router(medication.router)
 app.include_router(symptom.router)
 app.include_router(vitals.router)
+app.include_router(user.router)
 
 @app.get("/")
-def read_root():
+def home():
     return {"message": "Welcome to the Personal Health Tracker API"}

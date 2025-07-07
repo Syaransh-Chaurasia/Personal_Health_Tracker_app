@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vitals Recorder</title>
+    <link rel="stylesheet" href="static/module.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>Navigation</h2>
+    <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="medication.html">Medication</a></li>
+        <li><a href="symptom.html">Symptoms</a></li>
+        <li><a href="vitals.html">Vitals</a></li>
+        <li><a href="vitals_report.html">Vitals Report</a></li>
+        <li><a href="report.html">Full Report</a></li>
+        <li><a href="login.html" style="color:red;">Logout</a></li>
+    </ul>
+</div>
+
+<main>
+    <h1>Vitals Recorder</h1>
+
+    <form id="vitals-form">
+        <input type="text" id="vital_type" placeholder="Vital Type" required>
+        <input type="number" id="vital_value" placeholder="Value" required>
+        <input type="text" id="vital_unit" placeholder="Unit" required>
+        <input type="datetime-local" id="vital_time" required>
+        <textarea id="vital_notes" placeholder="Notes"></textarea>
+        <button type="submit">Add Vital</button>
+    </form>
+
+    <div class="table-section">
+        <h2>Vitals Records</h2>
+        <table>
+            <thead>
+            <tr><th>Type</th><th>Value</th><th>Time</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="vitals-table"></tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <button class="generate-report" onclick="window.location.href='vitals_report.html'">View Vitals Report</button>
+    </div>
+</main>
+
+<script>
+    const vitForm = document.getElementById('vitals-form');
+    const vitTable = document.getElementById('vitals-table');
+
+    async function fetchVitals() {
+        const res = await fetch('http://127.0.0.1:8000/vitals');
+        const data = await res.json();
+        vitTable.innerHTML = "";
+        data.forEach(item => {
+            vitTable.innerHTML += `
+      <tr>
+        <td>${item.type}</td>
+        <td>${item.value} ${item.unit}</td>
+        <td>${item.recorded_at}</td>
+        <td>
+          <button onclick="deleteVital(${item.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+        });
+    }
+
+    vitForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = {
+            type: document.getElementById('vital_type').value,
+            value: parseFloat(document.getElementById('vital_value').value),
+            unit: document.getElementById('vital_unit').value,
+            recorded_at: document.getElementById('vital_time').value,
+            notes: document.getElementById('vital_notes').value
+        };
+
+        await fetch('http://127.0.0.1:8000/vitals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        vitForm.reset();
+        fetchVitals();
+    });
+
+    async function deleteVital(id) {
+        await fetch(`http://127.0.0.1:8000/vitals/${id}`, { method: 'DELETE' });
+        fetchVitals();
+    }
+
+    fetchVitals();
+</script>
+
+</body>
+</html>

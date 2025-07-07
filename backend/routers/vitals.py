@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal
-from models.vitals import Vitals
-from schemas.vitals import VitalsCreate, VitalsUpdate, VitalsOut
+from backend.database import SessionLocal
+from backend.models.vitals import Vitals
+from backend.schemas.vitals import VitalsCreate, VitalsOut, VitalsUpdate
 
 router = APIRouter(prefix="/vitals", tags=["Vitals"])
 
@@ -22,7 +22,7 @@ def create_vital(vital: VitalsCreate, db: Session = Depends(get_db)):
     return db_vital
 
 @router.get("/", response_model=list[VitalsOut])
-def get_vitals(type: str = None, db: Session = Depends(get_db)):
+def read_vitals(type: str = None, db: Session = Depends(get_db)):
     query = db.query(Vitals)
     if type:
         query = query.filter(Vitals.type == type)
@@ -33,7 +33,7 @@ def update_vital(vital_id: int, vital_update: VitalsUpdate, db: Session = Depend
     vital = db.query(Vitals).get(vital_id)
     if not vital:
         raise HTTPException(status_code=404, detail="Vital not found")
-    for key, value in vital_update.dict().items():
+    for key, value in vital_update.dict(exclude_unset=True).items():
         setattr(vital, key, value)
     db.commit()
     db.refresh(vital)

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal
-from models.symptom import Symptom
-from schemas.symptom import SymptomCreate, SymptomUpdate, SymptomOut
+from backend.database import SessionLocal
+from backend.models.symptom import Symptom
+from backend.schemas.symptom import SymptomCreate, SymptomOut, SymptomUpdate
 
 router = APIRouter(prefix="/symptoms", tags=["Symptoms"])
 
@@ -22,7 +22,7 @@ def create_symptom(sym: SymptomCreate, db: Session = Depends(get_db)):
     return db_sym
 
 @router.get("/", response_model=list[SymptomOut])
-def get_symptoms(symptom_type: str = None, db: Session = Depends(get_db)):
+def read_symptoms(symptom_type: str = None, db: Session = Depends(get_db)):
     query = db.query(Symptom)
     if symptom_type:
         query = query.filter(Symptom.symptom_type == symptom_type)
@@ -33,7 +33,7 @@ def update_symptom(symptom_id: int, sym_update: SymptomUpdate, db: Session = Dep
     sym = db.query(Symptom).get(symptom_id)
     if not sym:
         raise HTTPException(status_code=404, detail="Symptom not found")
-    for key, value in sym_update.dict().items():
+    for key, value in sym_update.dict(exclude_unset=True).items():
         setattr(sym, key, value)
     db.commit()
     db.refresh(sym)

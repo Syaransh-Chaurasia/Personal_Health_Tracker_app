@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Full Health Report</title>
+  <link rel="stylesheet" href="static/module.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="medication.html">Medication</a></li>
+    <li><a href="symptom.html">Symptoms</a></li>
+    <li><a href="vitals.html">Vitals</a></li>
+    <li><a href="report.html">Full Report</a></li>
+    <li><a href="login.html" style="color:red;">Logout</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Overall Health Report</h1>
+  <p>Summary of all modules: Medications, Symptoms, Vitals</p>
+
+  <div class="chart-container">
+    <h2>Medication Overview</h2>
+    <canvas id="medicationChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>Symptom Overview</h2>
+    <canvas id="symptomChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <h2>Vitals Overview</h2>
+    <canvas id="vitalsChart"></canvas>
+  </div>
+
+  <button class="generate-report" onclick="window.print()">Print Report</button>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function loadMedicationChart() {
+    const res = await fetch('http://127.0.0.1:8000/medications');
+    const meds = await res.json();
+    const names = meds.map(m => m.name);
+    const taken = meds.map(m => m.taken ? 1 : 0);
+
+    new Chart(document.getElementById('medicationChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [{
+          label: 'Taken (1 = Yes)',
+          data: taken,
+          backgroundColor: '#4da8da'
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  async function loadSymptomChart() {
+    const res = await fetch('http://127.0.0.1:8000/symptoms');
+    const symptoms = await res.json();
+    const types = symptoms.map(s => s.symptom_type);
+    const severity = symptoms.map(s => parseInt(s.severity));
+
+    new Chart(document.getElementById('symptomChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: types,
+        datasets: [{
+          label: 'Severity',
+          data: severity,
+          borderColor: '#f39c12',
+          fill: false
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  async function loadVitalsChart() {
+    const res = await fetch('http://127.0.0.1:8000/vitals');
+    const vitals = await res.json();
+    const types = vitals.map(v => v.type);
+    const values = vitals.map(v => v.value);
+
+    new Chart(document.getElementById('vitalsChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: types,
+        datasets: [{
+          label: 'Vital Values',
+          data: values,
+          borderColor: '#2ecc71',
+          fill: false
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  // Load all graphs when page loads
+  loadMedicationChart();
+  loadSymptomChart();
+  loadVitalsChart();
+</script>
+
+</body>
+</html>

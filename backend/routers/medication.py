@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database import SessionLocal
-from models.medication import Medication
-from schemas.medication import MedicationCreate, MedicationUpdate, MedicationOut
+from backend.database import SessionLocal
+from backend.models.medication import Medication
+from backend.schemas.medication import MedicationCreate, MedicationOut, MedicationUpdate
 
 router = APIRouter(prefix="/medications", tags=["Medications"])
 
@@ -22,32 +22,32 @@ def create_medication(med: MedicationCreate, db: Session = Depends(get_db)):
     return db_med
 
 @router.get("/", response_model=list[MedicationOut])
-def get_medications(db: Session = Depends(get_db)):
+def read_medications(db: Session = Depends(get_db)):
     return db.query(Medication).all()
 
-@router.put("/{medication_id}", response_model=MedicationOut)
-def update_medication(medication_id: int, med_update: MedicationUpdate, db: Session = Depends(get_db)):
-    med = db.query(Medication).get(medication_id)
-    if not med:
+@router.put("/{med_id}", response_model=MedicationOut)
+def update_medication(med_id: int, med: MedicationUpdate, db: Session = Depends(get_db)):
+    db_med = db.query(Medication).get(med_id)
+    if not db_med:
         raise HTTPException(status_code=404, detail="Medication not found")
-    for key, value in med_update.dict().items():
-        setattr(med, key, value)
+    for key, value in med.dict(exclude_unset=True).items():
+        setattr(db_med, key, value)
     db.commit()
-    db.refresh(med)
-    return med
+    db.refresh(db_med)
+    return db_med
 
-@router.delete("/{medication_id}")
-def delete_medication(medication_id: int, db: Session = Depends(get_db)):
-    med = db.query(Medication).get(medication_id)
+@router.delete("/{med_id}")
+def delete_medication(med_id: int, db: Session = Depends(get_db)):
+    med = db.query(Medication).get(med_id)
     if not med:
         raise HTTPException(status_code=404, detail="Medication not found")
     db.delete(med)
     db.commit()
     return {"message": "Medication deleted"}
 
-@router.patch("/{medication_id}/toggle-taken", response_model=MedicationOut)
-def toggle_taken(medication_id: int, db: Session = Depends(get_db)):
-    med = db.query(Medication).get(medication_id)
+@router.patch("/{med_id}/toggle-taken")
+def toggle_medication(med_id: int, db: Session = Depends(get_db)):
+    med = db.query(Medication).get(med_id)
     if not med:
         raise HTTPException(status_code=404, detail="Medication not found")
     med.taken = not med.taken

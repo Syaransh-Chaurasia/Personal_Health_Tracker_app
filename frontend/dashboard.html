@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Health Tracker</title>
+  <link rel="stylesheet" href="static/module.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="medication.html">Medication</a></li>
+    <li><a href="symptom.html">Symptoms</a></li>
+    <li><a href="vitals.html">Vitals</a></li>
+    <li><a href="report.html">Generate Report</a></li>
+    <li><a href="login.html" style="color:red;">Logout</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Welcome to Your Health Dashboard</h1>
+  <h2>Select a Module to Manage:</h2>
+
+  <div class="input-tabs">
+    <a href="medication.html" class="tab">💊 Medication Tracker</a>
+    <a href="symptom.html" class="tab">🤒 Symptom Logger</a>
+    <a href="vitals.html" class="tab">❤️ Vitals Recorder</a>
+  </div>
+
+  <div class="footer">
+    <h2>Generate Your Complete Health Report</h2>
+    <p>Click below to view a summary of your medications, symptoms, and vitals in one place.</p>
+    <button class="generate-report" onclick="window.location.href='report.html'">Generate Report</button>
+  </div>
+</main>
+
+</body>
+</html>

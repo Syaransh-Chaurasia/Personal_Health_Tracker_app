@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 class MedicationBase(BaseModel):
     name: str
@@ -13,11 +14,10 @@ class MedicationCreate(MedicationBase):
     pass
 
 class MedicationUpdate(MedicationBase):
-    taken: bool
+    taken: Optional[bool] = None
 
 class MedicationOut(MedicationBase):
     id: int
     taken: bool
-
     class Config:
         orm_mode = True

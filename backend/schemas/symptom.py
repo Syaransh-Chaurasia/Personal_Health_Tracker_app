@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 class SymptomBase(BaseModel):
-    symptom_type: str
-    severity: int
-    notes: str = ""
     date: date
+    symptom_type: str
+    severity: str
+    notes: Optional[str] = None
 
 class SymptomCreate(SymptomBase):
     pass
@@ -15,6 +16,5 @@ class SymptomUpdate(SymptomBase):
 
 class SymptomOut(SymptomBase):
     id: int
-
     class Config:
         orm_mode = True

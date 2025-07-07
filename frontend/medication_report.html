@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Medication Report</title>
+  <link rel="stylesheet" href="static/module.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="medication.html">Medication</a></li>
+    <li><a href="symptom.html">Symptoms</a></li>
+    <li><a href="vitals.html">Vitals</a></li>
+    <li><a href="report.html">Full Report</a></li>
+    <li><a href="login.html" style="color:red;">Logout</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Medication Report</h1>
+  <canvas id="medChart"></canvas>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  async function loadMedicationChart() {
+    const res = await fetch('http://127.0.0.1:8000/medications');
+    const meds = await res.json();
+
+    const names = meds.map(m => m.name);
+    const counts = meds.map(m => m.taken ? 1 : 0);
+
+    new Chart(document.getElementById('medChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [{
+          label: 'Taken (1=Yes, 0=No)',
+          data: counts,
+          backgroundColor: '#4da8da'
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  loadMedicationChart();
+</script>
+
+</body>
+</html>

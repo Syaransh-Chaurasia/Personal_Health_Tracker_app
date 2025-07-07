@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Symptom Logger</title>
+  <link rel="stylesheet" href="static/module.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="medication.html">Medication</a></li>
+    <li><a href="symptom.html">Symptoms</a></li>
+    <li><a href="symptom_report.html">Symptom Report</a></li>
+    <li><a href="vitals.html">Vitals</a></li>
+    <li><a href="report.html">Full Report</a></li>
+    <li><a href="login.html" style="color:red;">Logout</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Symptom Logger</h1>
+
+  <form id="symptom-form">
+    <input type="date" id="sym_date" required>
+    <input type="text" id="sym_type" placeholder="Symptom Type" required>
+    <input type="text" id="sym_severity" placeholder="Severity" required>
+    <textarea id="sym_notes" placeholder="Notes"></textarea>
+    <button type="submit">Log Symptom</button>
+  </form>
+
+  <div class="table-section">
+    <h2>Logged Symptoms</h2>
+    <table>
+      <thead>
+      <tr><th>Date</th><th>Type</th><th>Severity</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="symptom-table"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <button class="generate-report" onclick="window.location.href='symptom_report.html'">View Symptom Report</button>
+  </div>
+</main>
+
+<script>
+  const symForm = document.getElementById('symptom-form');
+  const symTable = document.getElementById('symptom-table');
+
+  async function fetchSymptoms() {
+    const res = await fetch('http://127.0.0.1:8000/symptoms');
+    const data = await res.json();
+    symTable.innerHTML = "";
+    data.forEach(item => {
+      symTable.innerHTML += `
+      <tr>
+        <td>${item.date}</td>
+        <td>${item.symptom_type}</td>
+        <td>${item.severity}</td>
+        <td>
+          <button onclick="deleteSymptom(${item.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+    });
+  }
+
+  symForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = {
+      date: document.getElementById('sym_date').value,
+      symptom_type: document.getElementById('sym_type').value,
+      severity: document.getElementById('sym_severity').value,
+      notes: document.getElementById('sym_notes').value
+    };
+
+    await fetch('http://127.0.0.1:8000/symptoms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    symForm.reset();
+    fetchSymptoms();
+  });
+
+  async function deleteSymptom(id) {
+    await fetch(`http://127.0.0.1:8000/symptoms/${id}`, { method: 'DELETE' });
+    fetchSymptoms();
+  }
+
+  fetchSymptoms();
+</script>
+
+</body>
+</html>
