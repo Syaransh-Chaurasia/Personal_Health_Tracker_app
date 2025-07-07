@@ -27,9 +27,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   async function loadVitalsChart() {
-    const res = await fetch('http://127.0.0.1:8000/vitals');
+    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/vitals');
     const vitals = await res.json();
-
     const types = vitals.map(v => v.type);
     const values = vitals.map(v => v.value);
 
@@ -40,8 +39,8 @@
         datasets: [{
           label: 'Vital Values',
           data: values,
-          fill: false,
-          borderColor: '#2ecc71'
+          borderColor: '#2ecc71',
+          fill: false
         }]
       },
       options: { responsive: true }

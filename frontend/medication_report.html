@@ -27,19 +27,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   async function loadMedicationChart() {
-    const res = await fetch('http://127.0.0.1:8000/medications');
+    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/medications');
     const meds = await res.json();
-
     const names = meds.map(m => m.name);
-    const counts = meds.map(m => m.taken ? 1 : 0);
+    const taken = meds.map(m => m.taken ? 1 : 0);
 
     new Chart(document.getElementById('medChart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: names,
         datasets: [{
-          label: 'Taken (1=Yes, 0=No)',
-          data: counts,
+          label: 'Taken (1 = Yes, 0 = No)',
+          data: taken,
           backgroundColor: '#4da8da'
         }]
       },

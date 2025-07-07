@@ -53,7 +53,7 @@
     const medTable = document.getElementById('medication-table');
 
     async function fetchMedications() {
-        const res = await fetch('http://127.0.0.1:8000/medications');
+        const res = await fetch('https://personal-health-tracker-app-4.onrender.com/medications');
         const data = await res.json();
         medTable.innerHTML = "";
         data.forEach(item => {
@@ -81,7 +81,7 @@
             end_date: document.getElementById('end_date').value
         };
 
-        await fetch('http://127.0.0.1:8000/medications', {
+        await fetch('https://personal-health-tracker-app-4.onrender.com/medications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -92,7 +92,7 @@
     });
 
     async function deleteMedication(id) {
-        await fetch(`http://127.0.0.1:8000/medications/${id}`, { method: 'DELETE' });
+        await fetch(`https://personal-health-tracker-app-4.onrender.com/medications/${id}`, { method: 'DELETE' });
         fetchMedications();
     }
 

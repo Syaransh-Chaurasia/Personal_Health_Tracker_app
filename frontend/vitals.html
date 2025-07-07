@@ -52,7 +52,7 @@
     const vitTable = document.getElementById('vitals-table');
 
     async function fetchVitals() {
-        const res = await fetch('http://127.0.0.1:8000/vitals');
+        const res = await fetch('https://personal-health-tracker-app-4.onrender.com/vitals');
         const data = await res.json();
         vitTable.innerHTML = "";
         data.forEach(item => {
@@ -79,7 +79,7 @@
             notes: document.getElementById('vital_notes').value
         };
 
-        await fetch('http://127.0.0.1:8000/vitals', {
+        await fetch('https://personal-health-tracker-app-4.onrender.com/vitals', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -90,7 +90,7 @@
     });
 
     async function deleteVital(id) {
-        await fetch(`http://127.0.0.1:8000/vitals/${id}`, { method: 'DELETE' });
+        await fetch(`https://personal-health-tracker-app-4.onrender.com/vitals/${id}`, { method: 'DELETE' });
         fetchVitals();
     }
 

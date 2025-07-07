@@ -51,7 +51,7 @@
   const symTable = document.getElementById('symptom-table');
 
   async function fetchSymptoms() {
-    const res = await fetch('http://127.0.0.1:8000/symptoms');
+    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms');
     const data = await res.json();
     symTable.innerHTML = "";
     data.forEach(item => {
@@ -77,7 +77,7 @@
       notes: document.getElementById('sym_notes').value
     };
 
-    await fetch('http://127.0.0.1:8000/symptoms', {
+    await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -88,7 +88,7 @@
   });
 
   async function deleteSymptom(id) {
-    await fetch(`http://127.0.0.1:8000/symptoms/${id}`, { method: 'DELETE' });
+    await fetch(`https://personal-health-tracker-app-4.onrender.com/symptoms/${id}`, { method: 'DELETE' });
     fetchSymptoms();
   }
 
