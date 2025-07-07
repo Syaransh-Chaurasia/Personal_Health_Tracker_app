@@ -46,7 +46,7 @@
   }
 
   async function loadMedicationReport() {
-    const res = await fetch('https://personal-health-tracker-app-7.onrender.com/medications');
+    const res = await fetch('https://personal-health-tracker-app-8.onrender.com/medications');
     const meds = await res.json();
     const tbody = document.getElementById('med-report-table');
     tbody.innerHTML = '';
