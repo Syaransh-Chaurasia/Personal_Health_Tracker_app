@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="static/register.css">
 </head>
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
     <h2>Navigation</h2>
     <ul>
@@ -17,7 +16,6 @@
     </ul>
 </div>
 
-<!-- Main Content -->
 <main>
     <header>
         <h1>Create New Account</h1>
@@ -30,12 +28,10 @@
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
         </div>
-
         <div class="form-group">
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required>
         </div>
-
         <div class="form-group">
             <button type="submit" class="btn">Register</button>
         </div>
@@ -45,24 +41,23 @@
 </main>
 
 <script>
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
         e.preventDefault();
-
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
         const messageBox = document.getElementById('message-box');
 
-        const response = await fetch('https://personal-health-tracker-app-4.onrender.com/users/register', {
+        const res = await fetch('https://personal-health-tracker-app-4.onrender.com/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
-        if (response.ok) {
-            messageBox.innerHTML = `<div class="alert alert-success">Registration successful! Redirecting to login...</div>`;
+        if (res.ok) {
+            messageBox.innerHTML = '<div class="alert alert-success">Registration successful! Redirecting to login...</div>';
             setTimeout(() => window.location.href = 'login.html', 1500);
         } else {
-            messageBox.innerHTML = `<div class="alert alert-danger">Registration failed. Try a different email.</div>`;
+            messageBox.innerHTML = '<div class="alert alert-danger">Registration failed. Try a different email.</div>';
         }
     });
 </script>
