@@ -2,17 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard - Personal Health Tracker</title>
-  <link rel="stylesheet" href="static/dashboard.css">
+  <title>Dashboard - Health Tracker</title>
+  <link rel="stylesheet" href="static/module.css">
 </head>
 <body>
-
-<script>
-  const user = localStorage.getItem('user');
-  if (!user) {
-    window.location.href = 'index.html';
-  }
-</script>
 
 <div class="sidebar">
   <h2>Navigation</h2>
@@ -21,14 +14,14 @@
     <li><a href="medication.html">Medication</a></li>
     <li><a href="symptom.html">Symptoms</a></li>
     <li><a href="vitals.html">Vitals</a></li>
-    <li><a href="report.html">Full Report</a></li>
-    <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
+    <li><a href="report.html">Generate Report</a></li>
+    <li><a href="login.html" style="color:red;">Logout</a></li>
   </ul>
 </div>
 
 <main>
   <h1>Welcome to Your Health Dashboard</h1>
-  <h2>Manage Your Health Easily</h2>
+  <h2>Select a Module to Manage:</h2>
 
   <div class="input-tabs">
     <a href="medication.html" class="tab">💊 Medication Tracker</a>
@@ -37,20 +30,11 @@
   </div>
 
   <div class="footer">
-    <div class="footer-content">
-      <h2>Generate Your Complete Health Report</h2>
-      <p>Click below to see a full summary of your medications, symptoms, and vitals in one place.</p>
-      <button class="generate-report" onclick="window.location.href='report.html'">Generate Report</button>
-    </div>
+    <h2>Generate Your Complete Health Report</h2>
+    <p>Click below to view a summary of your medications, symptoms, and vitals in one place.</p>
+    <button class="generate-report" onclick="window.location.href='report.html'">Generate Report</button>
   </div>
 </main>
-
-<script>
-  function logout() {
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
-  }
-</script>
 
 </body>
 </html>
