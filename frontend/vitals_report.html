@@ -15,39 +15,52 @@
     <li><a href="symptom.html">Symptoms</a></li>
     <li><a href="vitals.html">Vitals</a></li>
     <li><a href="report.html">Full Report</a></li>
-    <li><a href="login.html" style="color:red;">Logout</a></li>
+    <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
   </ul>
 </div>
 
 <main>
   <h1>Vitals Report</h1>
-  <canvas id="vitalsChart"></canvas>
+  <div class="table-section">
+    <table>
+      <thead>
+      <tr>
+        <th>Type</th>
+        <th>Value</th>
+        <th>Unit</th>
+        <th>Recorded At</th>
+        <th>Notes</th>
+      </tr>
+      </thead>
+      <tbody id="vit-report-table"></tbody>
+    </table>
+  </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  async function loadVitalsChart() {
-    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/vitals');
-    const vitals = await res.json();
-    const types = vitals.map(v => v.type);
-    const values = vitals.map(v => v.value);
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
 
-    new Chart(document.getElementById('vitalsChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: types,
-        datasets: [{
-          label: 'Vital Values',
-          data: values,
-          borderColor: '#2ecc71',
-          fill: false
-        }]
-      },
-      options: { responsive: true }
+  async function loadVitalsReport() {
+    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/vitals');
+    const vits = await res.json();
+    const tbody = document.getElementById('vit-report-table');
+    tbody.innerHTML = '';
+    vits.forEach(v => {
+      tbody.innerHTML += `
+          <tr>
+            <td>${v.type}</td>
+            <td>${v.value}</td>
+            <td>${v.unit}</td>
+            <td>${v.recorded_at}</td>
+            <td>${v.notes || ''}</td>
+          </tr>`;
     });
   }
 
-  loadVitalsChart();
+  loadVitalsReport();
 </script>
 
 </body>

@@ -15,39 +15,50 @@
     <li><a href="symptom.html">Symptoms</a></li>
     <li><a href="vitals.html">Vitals</a></li>
     <li><a href="report.html">Full Report</a></li>
-    <li><a href="login.html" style="color:red;">Logout</a></li>
+    <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
   </ul>
 </div>
 
 <main>
   <h1>Symptom Report</h1>
-  <canvas id="symChart"></canvas>
+  <div class="table-section">
+    <table>
+      <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Severity</th>
+        <th>Notes</th>
+      </tr>
+      </thead>
+      <tbody id="sym-report-table"></tbody>
+    </table>
+  </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  async function loadSymptomChart() {
-    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms');
-    const symptoms = await res.json();
-    const types = symptoms.map(s => s.symptom_type);
-    const severity = symptoms.map(s => parseInt(s.severity));
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
 
-    new Chart(document.getElementById('symChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: types,
-        datasets: [{
-          label: 'Severity',
-          data: severity,
-          borderColor: '#f39c12',
-          fill: false
-        }]
-      },
-      options: { responsive: true }
+  async function loadSymptomReport() {
+    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms');
+    const syms = await res.json();
+    const tbody = document.getElementById('sym-report-table');
+    tbody.innerHTML = '';
+    syms.forEach(s => {
+      tbody.innerHTML += `
+          <tr>
+            <td>${s.date}</td>
+            <td>${s.symptom_type}</td>
+            <td>${s.severity}</td>
+            <td>${s.notes || ''}</td>
+          </tr>`;
     });
   }
 
-  loadSymptomChart();
+  loadSymptomReport();
 </script>
 
 </body>

@@ -15,70 +15,155 @@
     <li><a href="symptom.html">Symptoms</a></li>
     <li><a href="vitals.html">Vitals</a></li>
     <li><a href="report.html">Full Report</a></li>
-    <li><a href="login.html" style="color:red;">Logout</a></li>
+    <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
   </ul>
 </div>
 
 <main>
-  <h1>Full Health Report</h1>
-  <canvas id="medChart"></canvas>
-  <canvas id="symChart"></canvas>
-  <canvas id="vitalsChart"></canvas>
+  <h1>Cumulative Health Report</h1>
+
+  <h2>Medication History</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Name</th>
+      <th>Dosage</th>
+      <th>Frequency</th>
+      <th>Time Slots</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Taken</th>
+    </tr>
+    </thead>
+    <tbody id="med-report"></tbody>
+  </table>
+
+  <h2>Symptom History</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody id="sym-report"></tbody>
+  </table>
+
+  <h2>Vitals History</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Type</th>
+      <th>Value</th>
+      <th>Unit</th>
+      <th>Recorded At</th>
+      <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody id="vit-report"></tbody>
+  </table>
+
+  <h2>Health Activity Summary</h2>
+  <canvas id="activityChart"></canvas>
 
   <button class="generate-report" onclick="window.print()">Print Report</button>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  async function loadAllCharts() {
-    const medRes = await fetch('https://personal-health-tracker-app-4.onrender.com/medications');
-    const symRes = await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms');
-    const vitRes = await fetch('https://personal-health-tracker-app-4.onrender.com/vitals');
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+
+  async function loadReports() {
+    const [medRes, symRes, vitRes] = await Promise.all([
+      fetch('https://personal-health-tracker-app-4.onrender.com/medications'),
+      fetch('https://personal-health-tracker-app-4.onrender.com/symptoms'),
+      fetch('https://personal-health-tracker-app-4.onrender.com/vitals')
+    ]);
 
     const meds = await medRes.json();
     const syms = await symRes.json();
     const vits = await vitRes.json();
 
-    new Chart(document.getElementById('medChart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: meds.map(m => m.name),
-        datasets: [{
-          label: 'Medications Taken',
-          data: meds.map(m => m.taken ? 1 : 0),
-          backgroundColor: '#4da8da'
-        }]
-      }
+    const medTable = document.getElementById('med-report');
+    const symTable = document.getElementById('sym-report');
+    const vitTable = document.getElementById('vit-report');
+
+    meds.forEach(m => {
+      medTable.innerHTML += `
+          <tr>
+            <td>${m.name}</td>
+            <td>${m.dosage}</td>
+            <td>${m.frequency}</td>
+            <td>${m.time_slots}</td>
+            <td>${m.start_date}</td>
+            <td>${m.end_date}</td>
+            <td>${m.taken ? 'Yes' : 'No'}</td>
+          </tr>`;
     });
 
-    new Chart(document.getElementById('symChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: syms.map(s => s.symptom_type),
-        datasets: [{
-          label: 'Symptom Severity',
-          data: syms.map(s => parseInt(s.severity)),
-          borderColor: '#f39c12',
-          fill: false
-        }]
-      }
+    syms.forEach(s => {
+      symTable.innerHTML += `
+          <tr>
+            <td>${s.date}</td>
+            <td>${s.symptom_type}</td>
+            <td>${s.severity}</td>
+            <td>${s.notes || ''}</td>
+          </tr>`;
     });
 
-    new Chart(document.getElementById('vitalsChart').getContext('2d'), {
+    vits.forEach(v => {
+      vitTable.innerHTML += `
+          <tr>
+            <td>${v.type}</td>
+            <td>${v.value}</td>
+            <td>${v.unit}</td>
+            <td>${v.recorded_at}</td>
+            <td>${v.notes || ''}</td>
+          </tr>`;
+    });
+
+    generateActivityChart(meds, syms, vits);
+  }
+
+  function generateActivityChart(meds, syms, vits) {
+    const dateCounts = {};
+
+    meds.forEach(m => dateCounts[m.start_date] = (dateCounts[m.start_date] || 0) + 1);
+    syms.forEach(s => dateCounts[s.date] = (dateCounts[s.date] || 0) + 1);
+    vits.forEach(v => {
+      const day = v.recorded_at.split('T')[0];
+      dateCounts[day] = (dateCounts[day] || 0) + 1;
+    });
+
+    const labels = Object.keys(dateCounts).sort();
+    const dataPoints = labels.map(d => dateCounts[d]);
+
+    new Chart(document.getElementById('activityChart').getContext('2d'), {
       type: 'line',
       data: {
-        labels: vits.map(v => v.type),
+        labels: labels,
         datasets: [{
-          label: 'Vitals',
-          data: vits.map(v => v.value),
-          borderColor: '#2ecc71',
+          label: 'Total Health Records per Day',
+          data: dataPoints,
+          borderColor: '#4da8da',
           fill: false
         }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
       }
     });
   }
 
-  loadAllCharts();
+  loadReports();
 </script>
 
 </body>
