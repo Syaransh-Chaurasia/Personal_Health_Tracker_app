@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Symptom Logger</title>
+  <title>Symptom Report</title>
   <link rel="stylesheet" href="static/module.css">
 </head>
 <body>
@@ -11,88 +11,49 @@
   <h2>Navigation</h2>
   <ul>
     <li><a href="dashboard.html">Dashboard</a></li>
-    <li><a href="medication.html">Medication</a></li>
-    <li><a href="symptom.html">Symptoms</a></li>
-    <li><a href="symptom_report.html">Symptom Report</a></li>
-    <li><a href="vitals.html">Vitals</a></li>
-    <li><a href="report.html">Full Report</a></li>
-    <li><a href="login.html" style="color:red;">Logout</a></li>
+    <li><a href="symptom-report.html">Symptom Report</a></li>
+    <li><a href="medication-report.html">Medication Report</a></li>
+    <li><a href="vitals-report.html">Vitals Report</a></li>
+    <li><a href="final-report.html">Final Report</a></li>
   </ul>
 </div>
 
 <main>
-  <h1>Symptom Logger</h1>
-
-  <form id="symptom-form">
-    <input type="date" id="sym_date" required>
-    <input type="text" id="sym_type" placeholder="Symptom Type" required>
-    <input type="text" id="sym_severity" placeholder="Severity" required>
-    <textarea id="sym_notes" placeholder="Notes"></textarea>
-    <button type="submit">Log Symptom</button>
-  </form>
-
-  <div class="table-section">
-    <h2>Logged Symptoms</h2>
-    <table>
-      <thead>
-      <tr><th>Date</th><th>Type</th><th>Severity</th><th>Actions</th></tr>
-      </thead>
-      <tbody id="symptom-table"></tbody>
-    </table>
-  </div>
-
-  <div class="footer">
-    <button class="generate-report" onclick="window.location.href='symptom_report.html'">View Symptom Report</button>
-  </div>
+  <h1>Symptom Report</h1>
+  <table border="1" id="symptom-table">
+    <thead>
+    <tr>
+      <th>Date</th>
+      <th>Symptom</th>
+      <th>Severity</th>
+      <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data will be inserted here -->
+    </tbody>
+  </table>
 </main>
 
 <script>
-  const symForm = document.getElementById('symptom-form');
-  const symTable = document.getElementById('symptom-table');
+  async function loadSymptoms() {
+    const response = await fetch('https://personal-health-tracker-app-2.onrender.com/symptoms');
+    const data = await response.json();
+    const tableBody = document.getElementById('symptom-table').querySelector('tbody');
 
-  async function fetchSymptoms() {
-    const res = await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms');
-    const data = await res.json();
-    symTable.innerHTML = "";
-    data.forEach(item => {
-      symTable.innerHTML += `
-      <tr>
-        <td>${item.date}</td>
-        <td>${item.symptom_type}</td>
-        <td>${item.severity}</td>
-        <td>
-          <button onclick="deleteSymptom(${item.id})">Delete</button>
-        </td>
-      </tr>
-    `;
+    tableBody.innerHTML = '';
+    data.forEach(symptom => {
+      const row = `<tr>
+      <td>${symptom.date}</td>
+      <td>${symptom.symptom_type}</td>
+      <td>${symptom.severity}</td>
+      <td>${symptom.notes}</td>
+    </tr>`;
+      tableBody.innerHTML += row;
     });
   }
 
-  symForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const body = {
-      date: document.getElementById('sym_date').value,
-      symptom_type: document.getElementById('sym_type').value,
-      severity: document.getElementById('sym_severity').value,
-      notes: document.getElementById('sym_notes').value
-    };
-
-    await fetch('https://personal-health-tracker-app-4.onrender.com/symptoms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    symForm.reset();
-    fetchSymptoms();
-  });
-
-  async function deleteSymptom(id) {
-    await fetch(`https://personal-health-tracker-app-2.onrender.com/symptoms/${id}`, { method: 'DELETE' });
-    fetchSymptoms();
-  }
-
-  fetchSymptoms();
+  loadSymptoms();
 </script>
 
 </body>
