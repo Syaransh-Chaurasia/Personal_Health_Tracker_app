@@ -5,13 +5,16 @@ from backend.routers import medication, symptom, vitals
 app = FastAPI(title="Personal Health Tracker")
 
 # Allow frontend calls (CORS configuration)
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace "*" with your Netlify frontend URL
+    allow_origins=["https://calm-piroshki-e20fc2.netlify.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Include Routers
 app.include_router(medication.router)
