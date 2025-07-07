@@ -44,7 +44,7 @@
   }
 
   async function loadVitalsReport() {
-    const res = await fetch('https://personal-health-tracker-app-8.onrender.com/vitals');
+    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/vitals');
     const vits = await res.json();
     const tbody = document.getElementById('vit-report-table');
     tbody.innerHTML = '';
