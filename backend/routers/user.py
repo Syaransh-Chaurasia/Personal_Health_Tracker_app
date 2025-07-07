@@ -4,7 +4,7 @@ from backend.database import SessionLocal
 from backend.models.user import User
 from backend.schemas.user import UserCreate, UserOut
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/user", tags=["User"])
 
 def get_db():
     db = SessionLocal()
