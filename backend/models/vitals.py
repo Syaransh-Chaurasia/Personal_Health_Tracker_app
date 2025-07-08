@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, Float, Date, String, ForeignKey
 from backend.database import Base
 
 class Vitals(Base):
