@@ -1,19 +1,20 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 class MedicationCreate(BaseModel):
     name: str
     dosage: str
     start_date: date
-    end_date: date | None = None
-    instructions: str = ""
+    end_date: Optional[date] = None
+    instructions: Optional[str] = ""
 
 class MedicationUpdate(BaseModel):
-    name: str | None = None
-    dosage: str | None = None
-    start_date: date | None = None
-    end_date: date | None = None
-    instructions: str | None = None
+    name: Optional[str] = None
+    dosage: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    instructions: Optional[str] = None
 
 class MedicationOut(MedicationCreate):
     id: int

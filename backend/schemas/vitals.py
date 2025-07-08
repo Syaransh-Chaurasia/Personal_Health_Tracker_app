@@ -1,16 +1,17 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 class VitalsCreate(BaseModel):
     date: date
-    temperature: float | None = None
-    blood_pressure: str | None = None
-    heart_rate: int | None = None
+    temperature: Optional[float] = None
+    blood_pressure: Optional[str] = None
+    heart_rate: Optional[int] = None
 
 class VitalsUpdate(BaseModel):
-    temperature: float | None = None
-    blood_pressure: str | None = None
-    heart_rate: int | None = None
+    temperature: Optional[float] = None
+    blood_pressure: Optional[str] = None
+    heart_rate: Optional[int] = None
 
 class VitalsOut(VitalsCreate):
     id: int
