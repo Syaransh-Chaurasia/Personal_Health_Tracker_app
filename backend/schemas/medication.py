@@ -7,7 +7,7 @@ class MedicationCreate(BaseModel):
     dosage: str
     start_date: date
     end_date: Optional[date] = None
-    instructions: Optional[str] = ""
+    instructions: Optional[str] = None
 
 class MedicationUpdate(BaseModel):
     name: Optional[str] = None

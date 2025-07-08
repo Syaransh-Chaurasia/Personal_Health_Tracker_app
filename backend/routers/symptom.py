@@ -1,40 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from backend.dependencies import get_db
+from backend.auth_helpers import get_current_user
 from backend.models.symptom import Symptom
 from backend.schemas.symptom import SymptomCreate, SymptomUpdate, SymptomOut
-from backend.auth_helpers import get_db, get_current_user
-from backend.models.user import User
 
 router = APIRouter(prefix="/symptoms", tags=["Symptoms"])
 
 @router.post("/", response_model=SymptomOut)
-def create(sym: SymptomCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    item = Symptom(**sym.dict(), user_id=current_user.id)
-    db.add(item)
+def create_symptom(sym: SymptomCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    db_sym = Symptom(**sym.dict(), user_id=user.id)
+    db.add(db_sym)
     db.commit()
-    db.refresh(item)
-    return item
+    db.refresh(db_sym)
+    return db_sym
 
 @router.get("/", response_model=list[SymptomOut])
-def get_all(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Symptom).filter(Symptom.user_id == current_user.id).all()
+def read_symptoms(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return db.query(Symptom).filter(Symptom.user_id == user.id).all()
 
 @router.put("/{symptom_id}", response_model=SymptomOut)
-def update(symptom_id: int, sym: SymptomUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    item = db.query(Symptom).filter(Symptom.id == symptom_id, Symptom.user_id == current_user.id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Not found")
-    for key, value in sym.dict(exclude_unset=True).items():
-        setattr(item, key, value)
+def update_symptom(symptom_id: int, sym_update: SymptomUpdate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    sym = db.query(Symptom).filter(Symptom.id == symptom_id, Symptom.user_id == user.id).first()
+    if not sym:
+        raise HTTPException(status_code=404, detail="Symptom not found")
+    for key, value in sym_update.dict(exclude_unset=True).items():
+        setattr(sym, key, value)
     db.commit()
-    db.refresh(item)
-    return item
+    db.refresh(sym)
+    return sym
 
 @router.delete("/{symptom_id}")
-def delete(symptom_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    item = db.query(Symptom).filter(Symptom.id == symptom_id, Symptom.user_id == current_user.id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Not found")
-    db.delete(item)
+def delete_symptom(symptom_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    sym = db.query(Symptom).filter(Symptom.id == symptom_id, Symptom.user_id == user.id).first()
+    if not sym:
+        raise HTTPException(status_code=404, detail="Symptom not found")
+    db.delete(sym)
     db.commit()
-    return {"message": "Deleted"}
+    return {"message": "Symptom deleted"}

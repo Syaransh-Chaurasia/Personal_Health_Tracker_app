@@ -6,7 +6,7 @@ class SymptomCreate(BaseModel):
     date: date
     symptom_type: str
     severity: str
-    notes: Optional[str] = ""
+    notes: Optional[str] = None
 
 class SymptomUpdate(BaseModel):
     date: Optional[date] = None
@@ -18,4 +18,4 @@ class SymptomOut(SymptomCreate):
     id: int
 
     class Config:
-        orm_mode = True  # Keep this, works fine in both Pydantic V1 and V2
+        orm_mode = True

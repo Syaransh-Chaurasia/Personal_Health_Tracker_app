@@ -7,5 +7,5 @@ class Symptom(Base):
     date = Column(Date, nullable=False)
     symptom_type = Column(String, nullable=False)
     severity = Column(String, nullable=False)
-    notes = Column(Text)
+    notes = Column(Text, nullable=True)
     user_id = Column(Integer, ForeignKey('user.id'))

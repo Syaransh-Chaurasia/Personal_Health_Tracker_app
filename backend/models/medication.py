@@ -8,5 +8,5 @@ class Medication(Base):
     dosage = Column(String, nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=True)
-    instructions = Column(Text)
+    instructions = Column(Text, nullable=True)
     user_id = Column(Integer, ForeignKey('user.id'))
