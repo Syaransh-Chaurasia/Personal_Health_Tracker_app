@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from jose import jwt
-from .auth import SECRET_KEY, ALGORITHM
+from backend.auth import SECRET_KEY, ALGORITHM
 from backend.database import SessionLocal
 from backend.models.user import User
 
