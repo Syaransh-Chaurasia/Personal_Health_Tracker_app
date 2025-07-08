@@ -1,34 +1,19 @@
-from fastapi import Depends, HTTPException, Header
-from sqlalchemy.orm import Session
-from jose import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 from backend.auth import SECRET_KEY, ALGORITHM
 from backend.database import SessionLocal
 from backend.models.user import User
 
-# Dependency: DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
 
-# Dependency: Get current user from JWT
-def get_current_user(authorization: str = Header(...), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(status_code=401, detail="Invalid or missing token")
-    if not authorization.startswith("Bearer "):
-        raise credentials_exception
-
-    token = authorization.split(" ")[1]
-
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials")
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
         if email is None:
             raise credentials_exception
-        user = db.query(User).filter(User.email == email).first()
-        if user is None:
-            raise credentials_exception
-        return user
-    except:
+    except JWTError:
         raise credentials_exception
+    return email

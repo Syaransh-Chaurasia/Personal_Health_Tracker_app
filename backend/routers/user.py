@@ -20,7 +20,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed_password = get_password_hash(user.password)
+    hashed_password = get_password_hash(user.password)  # ✅ MUST hash
     new_user = User(email=user.email, password=hashed_password)
     db.add(new_user)
     db.commit()
