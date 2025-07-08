@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from backend.dependencies import get_db
 from backend.auth_helpers import get_current_user
 from backend.models.symptom import Symptom
-from backend.schemas.symptom import SymptomCreate, SymptomUpdate, SymptomOut
+from backend.schemas.symptom import SymptomCreate, SymptomOut, SymptomUpdate
 
 router = APIRouter(prefix="/symptoms", tags=["Symptoms"])
 

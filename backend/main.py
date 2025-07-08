@@ -5,15 +5,11 @@ from backend.routers import user, symptom, medication, vitals
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="Personal Health Tracker API",
-    description="Track symptoms, medications, and vitals securely.",
-    version="1.0"
-)
+app = FastAPI()
 
 origins = [
     "https://reliable-cheesecake-01ebcf.netlify.app",
-    "http://localhost:3000",
+    "http://localhost:3000"
 ]
 
 app.add_middleware(
@@ -31,4 +27,4 @@ app.include_router(vitals.router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Personal Health Tracker API is running"}
+    return {"message": "API Running"}

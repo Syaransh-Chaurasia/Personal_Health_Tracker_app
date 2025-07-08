@@ -26,7 +26,7 @@
       <thead>
       <tr>
         <th>Date</th>
-        <th>Type</th>
+        <th>Symptom</th>
         <th>Severity</th>
         <th>Notes</th>
       </tr>
@@ -40,27 +40,32 @@
   const token = localStorage.getItem('token');
   if (!token) window.location.href = 'index.html';
 
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'index.html';
-  }
+  const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
   async function loadSymptomReport() {
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/symptoms', {
-      headers: { 'Authorization': 'Bearer ' + token }
+    const res = await fetch(`${apiBase}/symptoms`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) return alert('Failed to load symptom report');
     const symptoms = await res.json();
+
     const tbody = document.getElementById('symptom-report-table');
     tbody.innerHTML = '';
     symptoms.forEach(s => {
       tbody.innerHTML += `
-        <tr>
-          <td>${s.date}</td>
-          <td>${s.symptom_type}</td>
-          <td>${s.severity}</td>
-          <td>${s.notes || ''}</td>
-        </tr>`;
+      <tr>
+        <td>${s.date}</td>
+        <td>${s.symptom_type}</td>
+        <td>${s.severity}</td>
+        <td>${s.notes || ''}</td>
+      </tr>
+    `;
     });
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';
   }
 
   loadSymptomReport();

@@ -14,7 +14,6 @@
         <li><a href="medication.html">Medication</a></li>
         <li><a href="symptom.html">Symptoms</a></li>
         <li><a href="vitals.html">Vitals</a></li>
-        <li><a href="vitals_report.html">Vitals Report</a></li>
         <li><a href="report.html">Full Report</a></li>
         <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
     </ul>
@@ -24,10 +23,10 @@
     <h1>Vitals Tracker</h1>
 
     <form id="vitals-form">
+        <input type="text" id="blood_pressure" placeholder="Blood Pressure (e.g., 120/80)" required>
+        <input type="text" id="heart_rate" placeholder="Heart Rate (e.g., 70 bpm)" required>
+        <input type="text" id="temperature" placeholder="Temperature (e.g., 98.6°F)" required>
         <input type="date" id="date" required>
-        <input type="text" id="blood_pressure" placeholder="Blood Pressure" required>
-        <input type="text" id="heart_rate" placeholder="Heart Rate" required>
-        <input type="text" id="temperature" placeholder="Temperature" required>
         <button type="submit">Add Vitals</button>
     </form>
 
@@ -35,10 +34,10 @@
         <table>
             <thead>
             <tr>
-                <th>Date</th>
-                <th>BP</th>
+                <th>Blood Pressure</th>
                 <th>Heart Rate</th>
                 <th>Temperature</th>
+                <th>Date</th>
                 <th>Actions</th>
             </tr>
             </thead>
@@ -50,66 +49,63 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'index.html';
-
     const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
     async function loadVitals() {
         const res = await fetch(`${apiBase}/vitals`, {
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-        const vitals = await res.json();
+        if (!res.ok) return alert('Failed to load vitals');
+        const data = await res.json();
         const tbody = document.getElementById('vitals-table');
         tbody.innerHTML = '';
-
-        vitals.forEach(v => {
+        data.forEach(v => {
             tbody.innerHTML += `
-        <tr>
-          <td>${v.date}</td>
-          <td>${v.blood_pressure}</td>
-          <td>${v.heart_rate}</td>
-          <td>${v.temperature}</td>
-          <td><button onclick="deleteVitals(${v.id})" style="background-color:#dc3545;">Delete</button></td>
-        </tr>
-      `;
+      <tr>
+        <td>${v.blood_pressure}</td>
+        <td>${v.heart_rate}</td>
+        <td>${v.temperature}</td>
+        <td>${v.date}</td>
+        <td><button onclick="deleteVitals(${v.id})" style="background-color:#dc3545;">Delete</button></td>
+      </tr>
+    `;
         });
+    }
+
+    async function deleteVitals(id) {
+        const res = await fetch(`${apiBase}/vitals/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+            alert('Vitals deleted.');
+            loadVitals();
+        } else {
+            alert('Failed to delete.');
+        }
     }
 
     document.getElementById('vitals-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const payload = {
-            date: document.getElementById('date').value,
             blood_pressure: document.getElementById('blood_pressure').value,
             heart_rate: document.getElementById('heart_rate').value,
-            temperature: document.getElementById('temperature').value
+            temperature: document.getElementById('temperature').value,
+            date: document.getElementById('date').value
         };
-
         const res = await fetch(`${apiBase}/vitals`, {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
         if (res.ok) {
             alert('Vitals added.');
             document.getElementById('vitals-form').reset();
             loadVitals();
         } else {
-            alert('Error adding vitals.');
+            alert('Failed to add vitals.');
         }
     });
-
-    async function deleteVitals(id) {
-        const res = await fetch(`${apiBase}/vitals/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        if (res.ok) {
-            alert('Deleted.');
-            loadVitals();
-        } else {
-            alert('Error deleting.');
-        }
-    }
 
     function logout() {
         localStorage.removeItem('token');

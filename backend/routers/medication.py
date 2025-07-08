@@ -19,6 +19,16 @@ def create_medication(med: MedicationCreate, db: Session = Depends(get_db), user
 def read_medications(db: Session = Depends(get_db), user=Depends(get_current_user)):
     return db.query(Medication).filter(Medication.user_id == user.id).all()
 
+@router.patch("/{medication_id}/toggle-taken", response_model=MedicationOut)
+def toggle_medication_taken(medication_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    med = db.query(Medication).filter(Medication.id == medication_id, Medication.user_id == user.id).first()
+    if not med:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    med.taken = not med.taken
+    db.commit()
+    db.refresh(med)
+    return med
+
 @router.put("/{medication_id}", response_model=MedicationOut)
 def update_medication(medication_id: int, med_update: MedicationUpdate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     med = db.query(Medication).filter(Medication.id == medication_id, Medication.user_id == user.id).first()

@@ -31,7 +31,7 @@
         <th>Time Slots</th>
         <th>Start Date</th>
         <th>End Date</th>
-        <th>Taken?</th>
+        <th>Status</th>
       </tr>
       </thead>
       <tbody id="med-report-table"></tbody>
@@ -43,30 +43,35 @@
   const token = localStorage.getItem('token');
   if (!token) window.location.href = 'index.html';
 
-  function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'index.html';
-  }
+  const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
   async function loadMedicationReport() {
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/medications', {
-      headers: { 'Authorization': 'Bearer ' + token }
+    const res = await fetch(`${apiBase}/medications`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (!res.ok) return alert('Failed to load medication report');
     const meds = await res.json();
+
     const tbody = document.getElementById('med-report-table');
     tbody.innerHTML = '';
     meds.forEach(m => {
       tbody.innerHTML += `
-        <tr>
-          <td>${m.name}</td>
-          <td>${m.dosage}</td>
-          <td>${m.frequency}</td>
-          <td>${m.time_slots}</td>
-          <td>${m.start_date}</td>
-          <td>${m.end_date}</td>
-          <td>${m.taken ? 'Yes' : 'No'}</td>
-        </tr>`;
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.dosage}</td>
+        <td>${m.frequency}</td>
+        <td>${m.time_slots}</td>
+        <td>${m.start_date}</td>
+        <td>${m.end_date}</td>
+        <td>${m.taken ? '✅' : '❌'}</td>
+      </tr>
+    `;
     });
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    window.location.href = 'index.html';
   }
 
   loadMedicationReport();

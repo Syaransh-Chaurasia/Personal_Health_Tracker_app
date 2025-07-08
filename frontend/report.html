@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Full Report</title>
+  <title>Full Health Report</title>
   <link rel="stylesheet" href="static/module.css">
 </head>
 <body>
@@ -20,22 +20,90 @@
 </div>
 
 <main>
-  <h1>Full Report</h1>
-  <ul>
-    <li><a href="medication_report.html">Medication Report</a></li>
-    <li><a href="symptom_report.html">Symptom Report</a></li>
-    <li><a href="vitals_report.html">Vitals Report</a></li>
-  </ul>
+  <h1>Full Health Report</h1>
+
+  <h2>Medications</h2>
+  <table><thead><tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Time Slots</th><th>Start</th><th>End</th><th>Status</th></tr></thead><tbody id="meds-table"></tbody></table>
+
+  <h2>Symptoms</h2>
+  <table><thead><tr><th>Date</th><th>Type</th><th>Severity</th><th>Notes</th></tr></thead><tbody id="symptoms-table"></tbody></table>
+
+  <h2>Vitals</h2>
+  <table><thead><tr><th>Date</th><th>BP</th><th>Heart Rate</th><th>Temperature</th></tr></thead><tbody id="vitals-table"></tbody></table>
 </main>
 
 <script>
   const token = localStorage.getItem('token');
   if (!token) window.location.href = 'index.html';
 
+  const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
+
+  async function loadFullReport() {
+    await loadMeds();
+    await loadSymptoms();
+    await loadVitals();
+  }
+
+  async function loadMeds() {
+    const res = await fetch(`${apiBase}/medications`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const meds = await res.json();
+    const tbody = document.getElementById('meds-table');
+    tbody.innerHTML = meds.map(m => `
+    <tr>
+      <td>${m.name}</td>
+      <td>${m.dosage}</td>
+      <td>${m.frequency}</td>
+      <td>${m.time_slots}</td>
+      <td>${m.start_date}</td>
+      <td>${m.end_date}</td>
+      <td>${m.taken ? '✅' : '❌'}</td>
+    </tr>
+  `).join('');
+  }
+
+  async function loadSymptoms() {
+    const res = await fetch(`${apiBase}/symptoms`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const syms = await res.json();
+    const tbody = document.getElementById('symptoms-table');
+    tbody.innerHTML = syms.map(s => `
+    <tr>
+      <td>${s.date}</td>
+      <td>${s.symptom_type}</td>
+      <td>${s.severity}</td>
+      <td>${s.notes || ''}</td>
+    </tr>
+  `).join('');
+  }
+
+  async function loadVitals() {
+    const res = await fetch(`${apiBase}/vitals`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const vits = await res.json();
+    const tbody = document.getElementById('vitals-table');
+    tbody.innerHTML = vits.map(v => `
+    <tr>
+      <td>${v.date}</td>
+      <td>${v.blood_pressure || '-'}</td>
+      <td>${v.heart_rate || '-'}</td>
+      <td>${v.temperature || '-'}</td>
+    </tr>
+  `).join('');
+  }
+
   function logout() {
     localStorage.removeItem('token');
     window.location.href = 'index.html';
   }
+
+  loadFullReport();
 </script>
 
 </body>
