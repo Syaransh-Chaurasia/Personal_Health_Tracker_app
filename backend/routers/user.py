@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from backend.database import SessionLocal
 from backend.models.user import User
 from backend.schemas.user import UserCreate, UserOut
-from backend.auth_helpers import get_password_hash, verify_password, create_access_token
+from backend.auth import get_password_hash, verify_password, create_access_token
 
 router = APIRouter(prefix="/user", tags=["User"])
 
