@@ -40,7 +40,7 @@
 
     if (res.ok) {
       const user = await res.json();
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', user.access_token);
       window.location.href = 'dashboard.html';
     } else {
       messageBox.innerHTML = '<div class="alert alert-danger">Invalid login. Please check your email or password.</div>';

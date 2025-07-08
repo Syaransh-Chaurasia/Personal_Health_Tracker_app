@@ -14,6 +14,7 @@
         <li><a href="medication.html">Medication</a></li>
         <li><a href="symptom.html">Symptoms</a></li>
         <li><a href="vitals.html">Vitals</a></li>
+        <li><a href="vitals_report.html">Vitals Report</a></li>
         <li><a href="report.html">Full Report</a></li>
         <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
     </ul>
@@ -23,10 +24,10 @@
     <h1>Vitals Tracker</h1>
 
     <form id="vitals-form">
-        <input type="number" id="heart_rate" placeholder="Heart Rate (bpm)" required>
-        <input type="text" id="blood_pressure" placeholder="Blood Pressure (e.g., 120/80)" required>
-        <input type="number" id="temperature" placeholder="Temperature (°C)" required>
         <input type="date" id="date" required>
+        <input type="text" id="blood_pressure" placeholder="Blood Pressure" required>
+        <input type="text" id="heart_rate" placeholder="Heart Rate" required>
+        <input type="text" id="temperature" placeholder="Temperature" required>
         <button type="submit">Add Vitals</button>
     </form>
 
@@ -35,8 +36,8 @@
             <thead>
             <tr>
                 <th>Date</th>
+                <th>BP</th>
                 <th>Heart Rate</th>
-                <th>Blood Pressure</th>
                 <th>Temperature</th>
                 <th>Actions</th>
             </tr>
@@ -47,26 +48,15 @@
 </main>
 
 <script>
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    const token = storedUser ? storedUser.access_token : null;
-
-    if (!token) {
-        alert('Please login first.');
-        window.location.href = 'index.html';
-    }
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'index.html';
 
     const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
     async function loadVitals() {
         const res = await fetch(`${apiBase}/vitals`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': 'Bearer ' + token }
         });
-
-        if (!res.ok) {
-            alert('Failed to load vitals.');
-            return;
-        }
-
         const vitals = await res.json();
         const tbody = document.getElementById('vitals-table');
         tbody.innerHTML = '';
@@ -75,45 +65,27 @@
             tbody.innerHTML += `
         <tr>
           <td>${v.date}</td>
-          <td>${v.heart_rate} bpm</td>
           <td>${v.blood_pressure}</td>
-          <td>${v.temperature} °C</td>
+          <td>${v.heart_rate}</td>
+          <td>${v.temperature}</td>
           <td><button onclick="deleteVitals(${v.id})" style="background-color:#dc3545;">Delete</button></td>
         </tr>
       `;
         });
     }
 
-    async function deleteVitals(id) {
-        const res = await fetch(`${apiBase}/vitals/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (res.ok) {
-            alert('Vitals entry deleted.');
-            loadVitals();
-        } else {
-            alert('Failed to delete vitals.');
-        }
-    }
-
     document.getElementById('vitals-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const payload = {
-            heart_rate: document.getElementById('heart_rate').value,
+            date: document.getElementById('date').value,
             blood_pressure: document.getElementById('blood_pressure').value,
-            temperature: document.getElementById('temperature').value,
-            date: document.getElementById('date').value
+            heart_rate: document.getElementById('heart_rate').value,
+            temperature: document.getElementById('temperature').value
         };
 
         const res = await fetch(`${apiBase}/vitals`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -122,12 +94,25 @@
             document.getElementById('vitals-form').reset();
             loadVitals();
         } else {
-            alert('Failed to add vitals.');
+            alert('Error adding vitals.');
         }
     });
 
+    async function deleteVitals(id) {
+        const res = await fetch(`${apiBase}/vitals/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+            alert('Deleted.');
+            loadVitals();
+        } else {
+            alert('Error deleting.');
+        }
+    }
+
     function logout() {
-        localStorage.removeItem('user');
+        localStorage.removeItem('token');
         window.location.href = 'index.html';
     }
 

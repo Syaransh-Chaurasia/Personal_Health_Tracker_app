@@ -53,86 +53,67 @@
 </main>
 
 <script>
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    const token = storedUser ? storedUser.access_token : null;
-
-    if (!token) {
-        alert('Please login first.');
-        window.location.href = 'index.html';
-    }
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'index.html';
 
     const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
     async function loadMedications() {
         const res = await fetch(`${apiBase}/medications`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': 'Bearer ' + token }
         });
-
-        if (!res.ok) {
-            alert('Failed to load medications.');
-            return;
-        }
-
         const meds = await res.json();
         const tbody = document.getElementById('medication-table');
         tbody.innerHTML = '';
-
         meds.forEach(m => {
             const takenLabel = m.taken ? '✅ Taken' : '❌ Not Taken';
             const actionText = m.taken ? 'Mark as Not Taken' : 'Mark as Taken';
-
             tbody.innerHTML += `
-              <tr>
-                <td>${m.name}</td>
-                <td>${m.dosage}</td>
-                <td>${m.frequency}</td>
-                <td>${m.time_slots}</td>
-                <td>${m.start_date}</td>
-                <td>${m.end_date}</td>
-                <td>${takenLabel}</td>
-                <td>
-                  <button onclick="toggleTaken(${m.id})">${actionText}</button>
-                  <button onclick="deleteMedication(${m.id})" style="background-color:#dc3545;">Delete</button>
-                </td>
-              </tr>
-            `;
+        <tr>
+          <td>${m.name}</td>
+          <td>${m.dosage}</td>
+          <td>${m.frequency}</td>
+          <td>${m.time_slots}</td>
+          <td>${m.start_date}</td>
+          <td>${m.end_date}</td>
+          <td>${takenLabel}</td>
+          <td>
+            <button onclick="toggleTaken(${m.id})">${actionText}</button>
+            <button onclick="deleteMedication(${m.id})" style="background-color:#dc3545;">Delete</button>
+          </td>
+        </tr>
+      `;
         });
     }
 
     async function toggleTaken(id) {
         const res = await fetch(`${apiBase}/medications/${id}/toggle-taken`, {
             method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
         });
-
         if (res.ok) {
-            alert('Medication status updated.');
+            alert('Status updated.');
             loadMedications();
         } else {
-            alert('Error updating status.');
+            alert('Error updating.');
         }
     }
 
     async function deleteMedication(id) {
         const res = await fetch(`${apiBase}/medications/${id}`, {
             method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': 'Bearer ' + token }
         });
-
         if (res.ok) {
-            alert('Medication deleted.');
+            alert('Deleted.');
             loadMedications();
         } else {
-            alert('Failed to delete.');
+            alert('Error deleting.');
         }
     }
 
     document.getElementById('medication-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const payload = {
             name: document.getElementById('name').value,
             dosage: document.getElementById('dosage').value,
@@ -144,10 +125,7 @@
 
         const res = await fetch(`${apiBase}/medications`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -156,12 +134,12 @@
             document.getElementById('medication-form').reset();
             loadMedications();
         } else {
-            alert('Error adding medication.');
+            alert('Failed to add.');
         }
     });
 
     function logout() {
-        localStorage.removeItem('user');
+        localStorage.removeItem('token');
         window.location.href = 'index.html';
     }
 
