@@ -1,7 +1,3 @@
-Here’s the **entire README in clean plain text** so you can copy-paste it easily into any text editor or your GitHub `README.md`:
-
----
-
 # Personal Health Tracker App
 
 A web-based application that helps users track their daily health status, symptoms, medications, and vitals—designed to promote personal wellbeing and health awareness.
