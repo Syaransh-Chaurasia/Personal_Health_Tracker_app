@@ -147,7 +147,3 @@ Email: [syaransh.chaurasiauk@gmail.com](mailto:syaransh.chaurasiauk@gmail.com)
 GitHub: [https://github.com/Syaransh-Chaurasia](https://github.com/Syaransh-Chaurasia)
 
 ---
-
-✅ This is now **plain text**—no Markdown formatting—so you can paste it anywhere you like.
-
-Let me know if you’d like `.env.example` or backend CORS setup as well.
