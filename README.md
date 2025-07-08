@@ -25,9 +25,10 @@ Deployment: Netlify (Frontend) + Render (Backend & Database)
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
-Personal\_Health\_Tracker\_app/
+```
+Personal_Health_Tracker_app/
 │
 ├── backend/
 │   ├── models/
@@ -47,14 +48,15 @@ Personal\_Health\_Tracker\_app/
 ├── frontend/
 │   ├── static/
 │   │   ├── images/
-│   │   └── \*.css
-│   ├── \*.html
-│   └── \_redirects
+│   │   └── *.css
+│   ├── *.html
+│   └── _redirects
 │
 ├── healthtracker.db
 ├── requirements.txt
 ├── README.md
 └── venv/
+```
 
 ---
 
