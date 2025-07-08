@@ -40,16 +40,28 @@
 </main>
 
 <script>
-  function logout() {
-    localStorage.removeItem('user');
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  const token = storedUser ? storedUser.access_token : null;
+
+  if (!token) {
+    alert('Please login first.');
     window.location.href = 'index.html';
   }
 
   async function loadMedicationReport() {
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/medications');
+    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/medications', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      alert('Failed to load medication report.');
+      return;
+    }
+
     const meds = await res.json();
     const tbody = document.getElementById('med-report-table');
     tbody.innerHTML = '';
+
     meds.forEach(m => {
       tbody.innerHTML += `
           <tr>
@@ -62,6 +74,11 @@
             <td>${m.taken ? 'Yes' : 'No'}</td>
           </tr>`;
     });
+  }
+
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
   }
 
   loadMedicationReport();

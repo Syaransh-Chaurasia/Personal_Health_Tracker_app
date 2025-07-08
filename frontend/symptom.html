@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Symptom Logger</title>
+  <title>Symptom Tracker</title>
   <link rel="stylesheet" href="static/module.css">
 </head>
 <body>
@@ -13,86 +13,124 @@
     <li><a href="dashboard.html">Dashboard</a></li>
     <li><a href="medication.html">Medication</a></li>
     <li><a href="symptom.html">Symptoms</a></li>
-    <li><a href="symptom_report.html">Symptom Report</a></li>
     <li><a href="vitals.html">Vitals</a></li>
     <li><a href="report.html">Full Report</a></li>
-    <li><a href="login.html" style="color:red;">Logout</a></li>
+    <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
   </ul>
 </div>
 
 <main>
-  <h1>Symptom Logger</h1>
+  <h1>Symptom Tracker</h1>
 
   <form id="symptom-form">
-    <input type="date" id="sym_date" required>
-    <input type="text" id="sym_type" placeholder="Symptom Type" required>
-    <input type="text" id="sym_severity" placeholder="Severity" required>
-    <textarea id="sym_notes" placeholder="Notes"></textarea>
-    <button type="submit">Log Symptom</button>
+    <input type="date" id="date" required>
+    <input type="text" id="symptom_type" placeholder="Symptom Type (e.g., Headache)" required>
+    <input type="text" id="severity" placeholder="Severity (e.g., Mild, Severe)" required>
+    <textarea id="notes" placeholder="Notes"></textarea>
+    <button type="submit">Add Symptom</button>
   </form>
 
   <div class="table-section">
-    <h2>Logged Symptoms</h2>
     <table>
       <thead>
-      <tr><th>Date</th><th>Type</th><th>Severity</th><th>Actions</th></tr>
+      <tr>
+        <th>Date</th>
+        <th>Symptom</th>
+        <th>Severity</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
       </thead>
       <tbody id="symptom-table"></tbody>
     </table>
   </div>
-
-  <div class="footer">
-    <button class="generate-report" onclick="window.location.href='symptom_report.html'">View Symptom Report</button>
-  </div>
 </main>
 
 <script>
-  const symForm = document.getElementById('symptom-form');
-  const symTable = document.getElementById('symptom-table');
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  const token = storedUser ? storedUser.access_token : null;
 
-  async function fetchSymptoms() {
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/symptoms');
-    const data = await res.json();
-    symTable.innerHTML = "";
-    data.forEach(item => {
-      symTable.innerHTML += `
-      <tr>
-        <td>${item.date}</td>
-        <td>${item.symptom_type}</td>
-        <td>${item.severity}</td>
-        <td>
-          <button onclick="deleteSymptom(${item.id})">Delete</button>
-        </td>
-      </tr>
-    `;
-    });
+  if (!token) {
+    alert('Please login first.');
+    window.location.href = 'index.html';
   }
 
-  symForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const body = {
-      date: document.getElementById('sym_date').value,
-      symptom_type: document.getElementById('sym_type').value,
-      severity: document.getElementById('sym_severity').value,
-      notes: document.getElementById('sym_notes').value
-    };
+  const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
-    await fetch('https://personal-health-tracker-app-2.onrender.com/symptoms', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+  async function loadSymptoms() {
+    const res = await fetch(`${apiBase}/symptoms`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    symForm.reset();
-    fetchSymptoms();
-  });
+    if (!res.ok) {
+      alert('Failed to load symptoms.');
+      return;
+    }
+
+    const symptoms = await res.json();
+    const tbody = document.getElementById('symptom-table');
+    tbody.innerHTML = '';
+
+    symptoms.forEach(s => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${s.date}</td>
+          <td>${s.symptom_type}</td>
+          <td>${s.severity}</td>
+          <td>${s.notes || ''}</td>
+          <td><button onclick="deleteSymptom(${s.id})" style="background-color:#dc3545;">Delete</button></td>
+        </tr>
+      `;
+    });
+  }
 
   async function deleteSymptom(id) {
-    await fetch(`https://personal-health-tracker-app-2.onrender.com/symptoms/${id}`, { method: 'DELETE' });
-    fetchSymptoms();
+    const res = await fetch(`${apiBase}/symptoms/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      alert('Symptom deleted.');
+      loadSymptoms();
+    } else {
+      alert('Failed to delete symptom.');
+    }
   }
 
-  fetchSymptoms();
+  document.getElementById('symptom-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      date: document.getElementById('date').value,
+      symptom_type: document.getElementById('symptom_type').value,
+      severity: document.getElementById('severity').value,
+      notes: document.getElementById('notes').value
+    };
+
+    const res = await fetch(`${apiBase}/symptoms`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      alert('Symptom added.');
+      document.getElementById('symptom-form').reset();
+      loadSymptoms();
+    } else {
+      alert('Failed to add symptom.');
+    }
+  });
+
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+
+  loadSymptoms();
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vitals Recorder</title>
+    <title>Vitals Tracker</title>
     <link rel="stylesheet" href="static/module.css">
 </head>
 <body>
@@ -14,87 +14,124 @@
         <li><a href="medication.html">Medication</a></li>
         <li><a href="symptom.html">Symptoms</a></li>
         <li><a href="vitals.html">Vitals</a></li>
-        <li><a href="vitals_report.html">Vitals Report</a></li>
         <li><a href="report.html">Full Report</a></li>
-        <li><a href="login.html" style="color:red;">Logout</a></li>
+        <li><a href="#" onclick="logout()" style="color:red;">Logout</a></li>
     </ul>
 </div>
 
 <main>
-    <h1>Vitals Recorder</h1>
+    <h1>Vitals Tracker</h1>
 
     <form id="vitals-form">
-        <input type="text" id="vital_type" placeholder="Vital Type" required>
-        <input type="number" id="vital_value" placeholder="Value" required>
-        <input type="text" id="vital_unit" placeholder="Unit" required>
-        <input type="datetime-local" id="vital_time" required>
-        <textarea id="vital_notes" placeholder="Notes"></textarea>
-        <button type="submit">Add Vital</button>
+        <input type="number" id="heart_rate" placeholder="Heart Rate (bpm)" required>
+        <input type="text" id="blood_pressure" placeholder="Blood Pressure (e.g., 120/80)" required>
+        <input type="number" id="temperature" placeholder="Temperature (°C)" required>
+        <input type="date" id="date" required>
+        <button type="submit">Add Vitals</button>
     </form>
 
     <div class="table-section">
-        <h2>Vitals Records</h2>
         <table>
             <thead>
-            <tr><th>Type</th><th>Value</th><th>Time</th><th>Actions</th></tr>
+            <tr>
+                <th>Date</th>
+                <th>Heart Rate</th>
+                <th>Blood Pressure</th>
+                <th>Temperature</th>
+                <th>Actions</th>
+            </tr>
             </thead>
             <tbody id="vitals-table"></tbody>
         </table>
     </div>
-
-    <div class="footer">
-        <button class="generate-report" onclick="window.location.href='vitals_report.html'">View Vitals Report</button>
-    </div>
 </main>
 
 <script>
-    const vitForm = document.getElementById('vitals-form');
-    const vitTable = document.getElementById('vitals-table');
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    const token = storedUser ? storedUser.access_token : null;
 
-    async function fetchVitals() {
-        const res = await fetch('https://personal-health-tracker-app-2.onrender.com/vitals');
-        const data = await res.json();
-        vitTable.innerHTML = "";
-        data.forEach(item => {
-            vitTable.innerHTML += `
-      <tr>
-        <td>${item.type}</td>
-        <td>${item.value} ${item.unit}</td>
-        <td>${item.recorded_at}</td>
-        <td>
-          <button onclick="deleteVital(${item.id})">Delete</button>
-        </td>
-      </tr>
-    `;
+    if (!token) {
+        alert('Please login first.');
+        window.location.href = 'index.html';
+    }
+
+    const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
+
+    async function loadVitals() {
+        const res = await fetch(`${apiBase}/vitals`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+            alert('Failed to load vitals.');
+            return;
+        }
+
+        const vitals = await res.json();
+        const tbody = document.getElementById('vitals-table');
+        tbody.innerHTML = '';
+
+        vitals.forEach(v => {
+            tbody.innerHTML += `
+        <tr>
+          <td>${v.date}</td>
+          <td>${v.heart_rate} bpm</td>
+          <td>${v.blood_pressure}</td>
+          <td>${v.temperature} °C</td>
+          <td><button onclick="deleteVitals(${v.id})" style="background-color:#dc3545;">Delete</button></td>
+        </tr>
+      `;
         });
     }
 
-    vitForm.addEventListener('submit', async (e) => {
+    async function deleteVitals(id) {
+        const res = await fetch(`${apiBase}/vitals/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+            alert('Vitals entry deleted.');
+            loadVitals();
+        } else {
+            alert('Failed to delete vitals.');
+        }
+    }
+
+    document.getElementById('vitals-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const body = {
-            type: document.getElementById('vital_type').value,
-            value: parseFloat(document.getElementById('vital_value').value),
-            unit: document.getElementById('vital_unit').value,
-            recorded_at: document.getElementById('vital_time').value,
-            notes: document.getElementById('vital_notes').value
+
+        const payload = {
+            heart_rate: document.getElementById('heart_rate').value,
+            blood_pressure: document.getElementById('blood_pressure').value,
+            temperature: document.getElementById('temperature').value,
+            date: document.getElementById('date').value
         };
 
-        await fetch('https://personal-health-tracker-app-2.onrender.com/vitals', {
+        const res = await fetch(`${apiBase}/vitals`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
         });
 
-        vitForm.reset();
-        fetchVitals();
+        if (res.ok) {
+            alert('Vitals added.');
+            document.getElementById('vitals-form').reset();
+            loadVitals();
+        } else {
+            alert('Failed to add vitals.');
+        }
     });
 
-    async function deleteVital(id) {
-        await fetch(`https://personal-health-tracker-app-2.onrender.com/vitals/${id}`, { method: 'DELETE' });
-        fetchVitals();
+    function logout() {
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
     }
 
-    fetchVitals();
+    loadVitals();
 </script>
 
 </body>

@@ -25,39 +25,57 @@
     <table>
       <thead>
       <tr>
-        <th>Type</th>
-        <th>Value</th>
-        <th>Unit</th>
-        <th>Recorded At</th>
-        <th>Notes</th>
+        <th>Date</th>
+        <th>Heart Rate</th>
+        <th>Blood Pressure</th>
+        <th>Temperature</th>
       </tr>
       </thead>
-      <tbody id="vit-report-table"></tbody>
+      <tbody id="vitals-report-table"></tbody>
     </table>
   </div>
 </main>
 
 <script>
-  function logout() {
-    localStorage.removeItem('user');
+  const storedUser = JSON.parse(localStorage.getItem('user'));
+  const token = storedUser ? storedUser.access_token : null;
+
+  if (!token) {
+    alert('Please login first.');
     window.location.href = 'index.html';
   }
 
+  const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
+
   async function loadVitalsReport() {
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/vitals');
-    const vits = await res.json();
-    const tbody = document.getElementById('vit-report-table');
-    tbody.innerHTML = '';
-    vits.forEach(v => {
-      tbody.innerHTML += `
-          <tr>
-            <td>${v.type}</td>
-            <td>${v.value}</td>
-            <td>${v.unit}</td>
-            <td>${v.recorded_at}</td>
-            <td>${v.notes || ''}</td>
-          </tr>`;
+    const res = await fetch(`${apiBase}/vitals`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
+
+    if (!res.ok) {
+      alert('Failed to load vitals.');
+      return;
+    }
+
+    const vitals = await res.json();
+    const tbody = document.getElementById('vitals-report-table');
+    tbody.innerHTML = '';
+
+    vitals.forEach(v => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${v.date}</td>
+          <td>${v.heart_rate} bpm</td>
+          <td>${v.blood_pressure}</td>
+          <td>${v.temperature} °C</td>
+        </tr>
+      `;
+    });
+  }
+
+  function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
   }
 
   loadVitalsReport();
