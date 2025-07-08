@@ -17,7 +17,7 @@
 
 <main>
   <h1>Login</h1>
-  <form id="login-form">
+  <form id="login-form" autocomplete="off">
     <div>
       <label>Email: <input type="email" id="email" required></label>
     </div>
@@ -34,33 +34,45 @@
     const form = document.getElementById('login-form');
     const messageBox = document.getElementById('message-box');
 
-    if (form) {
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('email').value.trim();
-        const password = document.getElementById('password').value.trim();
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
 
-        try {
-          const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-          if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('user_id', data.user_id);
-            window.location.href = 'dashboard.html';
-          } else {
-            messageBox.innerHTML = '<div class="alert alert-danger">Invalid email or password. Please try again.</div>';
-          }
-        } catch (error) {
-          console.error('Login error:', error);
-          messageBox.innerHTML = '<div class="alert alert-danger">Something went wrong. Please try again later.</div>';
+      if (!email || !password) {
+        messageBox.innerHTML = '<div class="alert alert-danger">Please fill in both fields.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch('https://personal-health-tracker-app-2.onrender.com/user/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          messageBox.innerHTML = `<div class="alert alert-danger">${errorData.detail || 'Invalid credentials'}</div>`;
+          return;
         }
-      });
-    }
+
+        const data = await response.json();
+
+        if (data.access_token) {
+          localStorage.setItem('token', data.access_token);
+          localStorage.setItem('user_id', data.user_id);
+          window.location.href = 'dashboard.html';
+        } else {
+          messageBox.innerHTML = '<div class="alert alert-danger">Login failed: No token received.</div>';
+        }
+
+      } catch (err) {
+        console.error('Error:', err);
+        messageBox.innerHTML = '<div class="alert alert-danger">Network or server error. Please try again later.</div>';
+      }
+    });
   });
 </script>
 

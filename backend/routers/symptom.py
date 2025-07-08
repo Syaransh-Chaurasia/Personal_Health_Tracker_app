@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.dependencies import get_db
-from backend.auth_helpers import get_current_user
+from backend.auth import get_current_user
 from backend.models.symptom import Symptom
 from backend.schemas.symptom import SymptomCreate, SymptomOut, SymptomUpdate
 
@@ -37,4 +37,4 @@ def delete_symptom(symptom_id: int, db: Session = Depends(get_db), user=Depends(
         raise HTTPException(status_code=404, detail="Symptom not found")
     db.delete(sym)
     db.commit()
-    return {"message": "Symptom deleted"}
+    return {"detail": "Symptom deleted"}

@@ -23,8 +23,9 @@
   <h1>Symptom Tracker</h1>
 
   <form id="symptom-form">
-    <input type="text" id="name" placeholder="Symptom Name" required>
-    <textarea id="notes" placeholder="Notes (optional)"></textarea>
+    <input type="text" id="symptom_type" placeholder="Type" required>
+    <input type="text" id="severity" placeholder="Severity" required>
+    <textarea id="notes" placeholder="Notes"></textarea>
     <input type="date" id="date" required>
     <button type="submit">Add Symptom</button>
   </form>
@@ -33,7 +34,8 @@
     <table>
       <thead>
       <tr>
-        <th>Name</th>
+        <th>Type</th>
+        <th>Severity</th>
         <th>Notes</th>
         <th>Date</th>
         <th>Actions</th>
@@ -47,61 +49,62 @@
 <script>
   const token = localStorage.getItem('token');
   if (!token) window.location.href = 'index.html';
+
   const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
   async function loadSymptoms() {
     const res = await fetch(`${apiBase}/symptoms`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Authorization': 'Bearer ' + token }
     });
-    if (!res.ok) return alert('Failed to load symptoms');
-    const data = await res.json();
+    const symptoms = await res.json();
     const tbody = document.getElementById('symptom-table');
     tbody.innerHTML = '';
-    data.forEach(item => {
+    symptoms.forEach(s => {
       tbody.innerHTML += `
-      <tr>
-        <td>${item.name}</td>
-        <td>${item.notes || ''}</td>
-        <td>${item.date}</td>
-        <td><button onclick="deleteSymptom(${item.id})" style="background-color:#dc3545;">Delete</button></td>
-      </tr>
-    `;
+        <tr>
+          <td>${s.symptom_type}</td>
+          <td>${s.severity}</td>
+          <td>${s.notes || ''}</td>
+          <td>${s.date}</td>
+          <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
+        </tr>`;
     });
   }
 
-  async function deleteSymptom(id) {
-    const res = await fetch(`${apiBase}/symptoms/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) {
-      alert('Symptom deleted.');
-      loadSymptoms();
-    } else {
-      alert('Failed to delete.');
-    }
-  }
-
-  document.getElementById('symptom-form').addEventListener('submit', async (e) => {
+  document.getElementById('symptom-form').addEventListener('submit', async e => {
     e.preventDefault();
     const payload = {
-      name: document.getElementById('name').value,
+      symptom_type: document.getElementById('symptom_type').value,
+      severity: document.getElementById('severity').value,
       notes: document.getElementById('notes').value,
       date: document.getElementById('date').value
     };
     const res = await fetch(`${apiBase}/symptoms`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     if (res.ok) {
-      alert('Symptom added.');
+      alert('Symptom added');
       document.getElementById('symptom-form').reset();
       loadSymptoms();
     } else {
-      alert('Failed to add symptom.');
+      alert('Failed to add symptom');
     }
   });
+
+  async function deleteSymptom(id) {
+    const res = await fetch(`${apiBase}/symptoms/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
+      alert('Symptom deleted');
+      loadSymptoms();
+    } else {
+      alert('Failed to delete');
+    }
+  }
 
   function logout() {
     localStorage.removeItem('token');

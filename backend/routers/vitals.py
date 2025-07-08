@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.dependencies import get_db
-from backend.auth_helpers import get_current_user
+from backend.auth import get_current_user
 from backend.models.vitals import Vitals
 from backend.schemas.vitals import VitalsCreate, VitalsOut, VitalsUpdate
 
@@ -37,4 +37,4 @@ def delete_vitals(vitals_id: int, db: Session = Depends(get_db), user=Depends(ge
         raise HTTPException(status_code=404, detail="Vitals not found")
     db.delete(vitals)
     db.commit()
-    return {"message": "Vitals deleted"}
+    return {"detail": "Vitals deleted"}
