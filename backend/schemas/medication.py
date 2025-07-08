@@ -1,23 +1,22 @@
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
 
-class MedicationBase(BaseModel):
+class MedicationCreate(BaseModel):
     name: str
     dosage: str
-    frequency: str
-    time_slots: str
     start_date: date
-    end_date: date
+    end_date: date | None = None
+    instructions: str = ""
 
-class MedicationCreate(MedicationBase):
-    pass
+class MedicationUpdate(BaseModel):
+    name: str | None = None
+    dosage: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    instructions: str | None = None
 
-class MedicationUpdate(MedicationBase):
-    taken: Optional[bool] = None
-
-class MedicationOut(MedicationBase):
+class MedicationOut(MedicationCreate):
     id: int
-    taken: bool
+
     class Config:
         orm_mode = True

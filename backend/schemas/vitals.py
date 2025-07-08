@@ -1,21 +1,19 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
+from datetime import date
 
-class VitalsBase(BaseModel):
-    type: str
-    value: float
-    unit: str
-    recorded_at: datetime
-    notes: Optional[str] = None
+class VitalsCreate(BaseModel):
+    date: date
+    temperature: float | None = None
+    blood_pressure: str | None = None
+    heart_rate: int | None = None
 
-class VitalsCreate(VitalsBase):
-    pass
+class VitalsUpdate(BaseModel):
+    temperature: float | None = None
+    blood_pressure: str | None = None
+    heart_rate: int | None = None
 
-class VitalsUpdate(VitalsBase):
-    pass
-
-class VitalsOut(VitalsBase):
+class VitalsOut(VitalsCreate):
     id: int
+
     class Config:
         orm_mode = True

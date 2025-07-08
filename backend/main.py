@@ -1,27 +1,37 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routers import medication, symptom, vitals, user  # ✅ Make sure this is imported
 from backend.database import Base, engine
+from backend.routers import user, symptom, medication, vitals
 
-# Create tables
+# Create all tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Personal Health Tracker")
+app = FastAPI(
+    title="Personal Health Tracker API",
+    description="Track symptoms, medications, and vitals securely.",
+    version="1.0"
+)
+
+# CORS configuration
+origins = [
+    "https://reliable-cheesecake-01ebcf.netlify.app",  # Netlify frontend
+    "http://localhost:3000",  # local dev frontend
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Later replace with your Netlify domain for security
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routers
-app.include_router(medication.router)
+# Include all routers
+app.include_router(user.router)
 app.include_router(symptom.router)
+app.include_router(medication.router)
 app.include_router(vitals.router)
-app.include_router(user.router)  # ✅ This was missing
 
 @app.get("/")
-def home():
-    return {"message": "API is running"}
+def read_root():
+    return {"message": "Personal Health Tracker API is running"}

@@ -6,4 +6,6 @@ python-multipart
 jinja2
 aiofiles
 psycopg2-binary
+passlib[bcrypt]
+python-jose
 

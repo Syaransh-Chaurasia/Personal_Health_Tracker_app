@@ -1,49 +1,41 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend.database import SessionLocal
 from backend.models.vitals import Vitals
-from backend.schemas.vitals import VitalsCreate, VitalsOut, VitalsUpdate
+from backend.schemas.vitals import VitalsCreate, VitalsUpdate, VitalsOut
+from backend.auth_helpers import get_db, get_current_user
+from backend.models.user import User
 
 router = APIRouter(prefix="/vitals", tags=["Vitals"])
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 @router.post("/", response_model=VitalsOut)
-def create_vital(vital: VitalsCreate, db: Session = Depends(get_db)):
-    db_vital = Vitals(**vital.dict())
-    db.add(db_vital)
+def create_vitals(vitals: VitalsCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    new_vitals = Vitals(**vitals.dict(), user_id=current_user.id)
+    db.add(new_vitals)
     db.commit()
-    db.refresh(db_vital)
-    return db_vital
+    db.refresh(new_vitals)
+    return new_vitals
 
 @router.get("/", response_model=list[VitalsOut])
-def read_vitals(type: str = None, db: Session = Depends(get_db)):
-    query = db.query(Vitals)
-    if type:
-        query = query.filter(Vitals.type == type)
-    return query.all()
+def read_vitals(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    vitals = db.query(Vitals).filter(Vitals.user_id == current_user.id).all()
+    return vitals
 
-@router.put("/{vital_id}", response_model=VitalsOut)
-def update_vital(vital_id: int, vital_update: VitalsUpdate, db: Session = Depends(get_db)):
-    vital = db.query(Vitals).get(vital_id)
-    if not vital:
-        raise HTTPException(status_code=404, detail="Vital not found")
-    for key, value in vital_update.dict(exclude_unset=True).items():
-        setattr(vital, key, value)
+@router.put("/{vitals_id}", response_model=VitalsOut)
+def update_vitals(vitals_id: int, vitals_update: VitalsUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    vitals = db.query(Vitals).filter(Vitals.id == vitals_id, Vitals.user_id == current_user.id).first()
+    if not vitals:
+        raise HTTPException(status_code=404, detail="Vitals record not found")
+    for key, value in vitals_update.dict(exclude_unset=True).items():
+        setattr(vitals, key, value)
     db.commit()
-    db.refresh(vital)
-    return vital
+    db.refresh(vitals)
+    return vitals
 
-@router.delete("/{vital_id}")
-def delete_vital(vital_id: int, db: Session = Depends(get_db)):
-    vital = db.query(Vitals).get(vital_id)
-    if not vital:
-        raise HTTPException(status_code=404, detail="Vital not found")
-    db.delete(vital)
+@router.delete("/{vitals_id}")
+def delete_vitals(vitals_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    vitals = db.query(Vitals).filter(Vitals.id == vitals_id, Vitals.user_id == current_user.id).first()
+    if not vitals:
+        raise HTTPException(status_code=404, detail="Vitals record not found")
+    db.delete(vitals)
     db.commit()
-    return {"message": "Vital deleted"}
+    return {"message": "Vitals record deleted"}

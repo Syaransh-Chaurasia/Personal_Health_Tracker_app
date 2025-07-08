@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Text
+from sqlalchemy import Column, Integer, String, Date, Text, ForeignKey
 from backend.database import Base
 
 class Symptom(Base):
@@ -8,3 +8,4 @@ class Symptom(Base):
     symptom_type = Column(String, nullable=False)
     severity = Column(String, nullable=False)
     notes = Column(Text)
+    user_id = Column(Integer, ForeignKey('user.id'))
