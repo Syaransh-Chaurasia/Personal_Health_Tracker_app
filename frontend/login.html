@@ -1,22 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="static/login.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <h2>Navigation</h2>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="register.html">Register</a></li>
+  </ul>
+</div>
+
+<main>
+  <h1>Login</h1>
+  <form id="login-form">
+    <div>
+      <label>Email: <input type="email" id="email" required></label>
+    </div>
+    <div>
+      <label>Password: <input type="password" id="password" required></label>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+  <div id="message-box"></div>
+</main>
+
 <script>
-  document.getElementById('login-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('login-form');
     const messageBox = document.getElementById('message-box');
 
-    const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
+    if (form) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
 
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem('token', data.access_token);   // ✅ Only the token
-      window.location.href = 'dashboard.html';
-    } else {
-      messageBox.innerHTML = '<div class="alert alert-danger">Invalid login.</div>';
+        try {
+          const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user_id', data.user_id);
+            window.location.href = 'dashboard.html';
+          } else {
+            messageBox.innerHTML = '<div class="alert alert-danger">Invalid email or password. Please try again.</div>';
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          messageBox.innerHTML = '<div class="alert alert-danger">Something went wrong. Please try again later.</div>';
+        }
+      });
     }
   });
 </script>
+
+</body>
+</html>
