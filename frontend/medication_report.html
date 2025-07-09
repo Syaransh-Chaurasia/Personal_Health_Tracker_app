@@ -21,6 +21,7 @@
 
 <main>
   <h1>Medication Report</h1>
+
   <div class="table-section">
     <table>
       <thead>
@@ -32,6 +33,7 @@
         <th>Start Date</th>
         <th>End Date</th>
         <th>Status</th>
+        <th>Actions</th>
       </tr>
       </thead>
       <tbody id="med-report-table"></tbody>
@@ -62,9 +64,36 @@
         <td>${m.time_slots}</td>
         <td>${m.start_date}</td>
         <td>${m.end_date}</td>
-        <td>${m.taken ? '✅' : '❌'}</td>
+        <td>
+          <button onclick="toggleTaken(${m.id}, ${m.taken})"
+            style="background-color:${m.taken ? 'green' : 'gray'};">
+            ${m.taken ? 'Taken ✅' : 'Mark as Taken'}
+          </button>
+        </td>
+        <td>
+          <button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button>
+        </td>
       </tr>
-    `).join('') : '<tr><td colspan="7">No medications found.</td></tr>';
+    `).join('') : '<tr><td colspan="8">No medications found.</td></tr>';
+  }
+
+  async function toggleTaken(id, currentStatus) {
+    const res = await fetch(`${apiBase}/medications/${id}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taken: !currentStatus })
+    });
+    if (res.ok) loadMedicationReport();
+    else alert('Failed to update status');
+  }
+
+  async function deleteMedication(id) {
+    const res = await fetch(`${apiBase}/medications/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) loadMedicationReport();
+    else alert('Failed to delete medication');
   }
 
   function logout() {

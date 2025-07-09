@@ -12,6 +12,7 @@
     <ul>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="medication.html">Medication</a></li>
+        <li><a href="medication_report.html">Medication Report</a></li>
         <li><a href="symptom.html">Symptoms</a></li>
         <li><a href="vitals.html">Vitals</a></li>
         <li><a href="report.html">Full Report</a></li>
@@ -54,42 +55,65 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'index.html';
+
     const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
     async function loadMedications() {
         const res = await fetch(`${apiBase}/medications`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
+
+        if (!res.ok) {
+            alert('Failed to load medications');
+            return;
+        }
+
         const meds = await res.json();
         const tbody = document.getElementById('medication-table');
         tbody.innerHTML = meds.map(m => `
             <tr>
-              <td>${m.name}</td>
-              <td>${m.dosage}</td>
-              <td>${m.frequency}</td>
-              <td>${m.time_slots}</td>
-              <td>${m.start_date}</td>
-              <td>${m.end_date}</td>
-              <td>
-                <button onclick="toggleMedication(${m.id}, ${!m.taken})">
-                  ${m.taken ? '✅ Taken' : '❌ Not Taken'}
-                </button>
-              </td>
-              <td><button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button></td>
+                <td>${m.name}</td>
+                <td>${m.dosage}</td>
+                <td>${m.frequency}</td>
+                <td>${m.time_slots}</td>
+                <td>${m.start_date}</td>
+                <td>${m.end_date}</td>
+                <td>
+                    <button onclick="toggleTaken(${m.id}, ${m.taken})"
+                        style="background-color:${m.taken ? 'green' : 'gray'};">
+                        ${m.taken ? 'Taken ✅' : 'Mark as Taken'}
+                    </button>
+                </td>
+                <td>
+                    <button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button>
+                </td>
             </tr>
         `).join('');
     }
 
-    async function toggleMedication(id, takenStatus) {
-        await fetch(`${apiBase}/medications/${id}`, {
+    async function toggleTaken(id, currentStatus) {
+        const res = await fetch(`${apiBase}/medications/${id}`, {
             method: 'PUT',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ taken: takenStatus })
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taken: !currentStatus })
         });
-        loadMedications();
+        if (res.ok) {
+            loadMedications();
+        } else {
+            alert('Failed to update status');
+        }
+    }
+
+    async function deleteMedication(id) {
+        const res = await fetch(`${apiBase}/medications/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.ok) {
+            loadMedications();
+        } else {
+            alert('Failed to delete medication');
+        }
     }
 
     document.getElementById('medication-form').addEventListener('submit', async e => {
@@ -109,20 +133,12 @@
         });
         if (res.ok) {
             alert('Medication added');
-            document.getElementById('medication-form').reset();
+            e.target.reset();
             loadMedications();
         } else {
             alert('Failed to add medication');
         }
     });
-
-    async function deleteMedication(id) {
-        await fetch(`${apiBase}/medications/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        loadMedications();
-    }
 
     function logout() {
         localStorage.clear();
