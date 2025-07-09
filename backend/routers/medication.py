@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from backend.schemas import medication as schemas
 from backend import models
+from backend.models.user import User
 from backend.database import get_db
 from backend.auth import get_current_user
 
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/medications", tags=["Medications"])
 
 # ✅ GET all medications for the logged-in user
 @router.get("/", response_model=list[schemas.MedicationOut])
-def get_medications(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def get_medications(db: Session = Depends(get_db),  current_user: User = Depends(get_current_user)):
     return db.query(models.Medication).filter(models.Medication.user_id == current_user.id).all()
 
 # ✅ POST create medication
