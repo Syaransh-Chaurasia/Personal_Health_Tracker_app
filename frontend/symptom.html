@@ -53,27 +53,24 @@
   const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
   async function loadSymptoms() {
-    try {
-      const res = await fetch(`${apiBase}/symptoms`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed to load symptoms');
-      const symptoms = await res.json();
-      const tbody = document.getElementById('symptom-table');
-      tbody.innerHTML = '';
-      symptoms.forEach(s => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${s.date}</td>
-            <td>${s.symptom_type}</td>
-            <td>${s.severity}</td>
-            <td>${s.notes || ''}</td>
-            <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
-          </tr>`;
-      });
-    } catch (err) {
-      alert('Error loading symptoms');
-    }
+    const res = await fetch(`${apiBase}/symptoms`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return alert('Failed to load symptoms');
+    const symptoms = await res.json();
+    const tbody = document.getElementById('symptom-table');
+    tbody.innerHTML = '';
+    symptoms.forEach(s => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${s.date}</td>
+          <td>${s.symptom_type}</td>
+          <td>${s.severity}</td>
+          <td>${s.notes || ''}</td>
+          <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
+        </tr>
+      `;
+    });
   }
 
   document.getElementById('symptom-form').addEventListener('submit', async e => {
@@ -84,32 +81,30 @@
       notes: document.getElementById('notes').value,
       date: document.getElementById('date').value
     };
-    try {
-      const res = await fetch(`${apiBase}/symptoms`, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error('Failed to add symptom');
+    const res = await fetch(`${apiBase}/symptoms`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
       alert('Symptom added');
       document.getElementById('symptom-form').reset();
       loadSymptoms();
-    } catch (err) {
-      alert('Network error while adding symptom');
+    } else {
+      alert('Failed to add symptom');
     }
   });
 
   async function deleteSymptom(id) {
-    try {
-      const res = await fetch(`${apiBase}/symptoms/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed to delete');
+    const res = await fetch(`${apiBase}/symptoms/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (res.ok) {
       alert('Symptom deleted');
       loadSymptoms();
-    } catch (err) {
-      alert('Network error deleting symptom');
+    } else {
+      alert('Failed to delete');
     }
   }
 
