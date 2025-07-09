@@ -20,4 +20,4 @@ class MedicationOut(MedicationBase):
     taken: bool
 
     class Config:
-        from_attributes = True  # Pydantic v2
+        from_attributes = True

@@ -12,4 +12,4 @@ class Medication(Base):
     time_slots = Column(String, nullable=False)
     start_date = Column(String, nullable=False)
     end_date = Column(String, nullable=False)
-    taken = Column(Boolean, nullable=False, default=False)  # ✅ Force default to False
+    taken = Column(Boolean, nullable=False, default=False)  # ✅ Fixed nullable=False
