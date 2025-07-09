@@ -8,8 +8,9 @@
 <body>
 
 <script>
-  const user = localStorage.getItem('user');
-  if (!user) {
+  // ✅ Check for correct token (not 'user') to allow access
+  const token = localStorage.getItem('token');
+  if (!token) {
     window.location.href = 'index.html';
   }
 </script>
@@ -47,7 +48,8 @@
 
 <script>
   function logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');     // ✅ Clear correct token key
+    localStorage.removeItem('user_id');   // ✅ Clear user ID if stored
     window.location.href = 'index.html';
   }
 </script>
