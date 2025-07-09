@@ -60,60 +60,48 @@
 
     async function loadMedications() {
         const res = await fetch(`${apiBase}/medications`, {
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        if (!res.ok) {
-            alert('Failed to load medications');
-            return;
-        }
-
         const meds = await res.json();
         const tbody = document.getElementById('medication-table');
         tbody.innerHTML = meds.map(m => `
-            <tr>
-                <td>${m.name}</td>
-                <td>${m.dosage}</td>
-                <td>${m.frequency}</td>
-                <td>${m.time_slots}</td>
-                <td>${m.start_date}</td>
-                <td>${m.end_date}</td>
-                <td>
-                    <button onclick="toggleTaken(${m.id}, ${m.taken})"
-                        style="background-color:${m.taken ? 'green' : 'gray'};">
-                        ${m.taken ? 'Taken ✅' : 'Mark as Taken'}
-                    </button>
-                </td>
-                <td>
-                    <button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button>
-                </td>
-            </tr>
-        `).join('');
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.dosage}</td>
+        <td>${m.frequency}</td>
+        <td>${m.time_slots}</td>
+        <td>${m.start_date}</td>
+        <td>${m.end_date}</td>
+        <td>
+          <button onclick="toggleTaken(${m.id}, ${m.taken})"
+                  style="background-color:${m.taken ? 'green' : 'gray'};">
+            ${m.taken ? 'Taken ✅' : 'Mark as Taken'}
+          </button>
+        </td>
+        <td>
+          <button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button>
+        </td>
+      </tr>
+    `).join('');
     }
 
     async function toggleTaken(id, currentStatus) {
-        const res = await fetch(`${apiBase}/medications/${id}`, {
+        const res = await fetch(`${apiBase}/medications/${id}/status`, {
             method: 'PUT',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ taken: !currentStatus })
         });
-        if (res.ok) {
-            loadMedications();
-        } else {
-            alert('Failed to update status');
-        }
+        if (res.ok) loadMedications();
+        else alert('Failed to update status');
     }
 
     async function deleteMedication(id) {
         const res = await fetch(`${apiBase}/medications/${id}`, {
             method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.ok) {
-            loadMedications();
-        } else {
-            alert('Failed to delete medication');
-        }
+        if (res.ok) loadMedications();
+        else alert('Failed to delete medication');
     }
 
     document.getElementById('medication-form').addEventListener('submit', async e => {
@@ -128,11 +116,10 @@
         };
         const res = await fetch(`${apiBase}/medications`, {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         if (res.ok) {
-            alert('Medication added');
             e.target.reset();
             loadMedications();
         } else {
