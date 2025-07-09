@@ -23,9 +23,9 @@
   <h1>Symptom Tracker</h1>
 
   <form id="symptom-form">
-    <input type="text" id="symptom_type" placeholder="Type" required>
-    <input type="text" id="severity" placeholder="Severity" required>
-    <textarea id="notes" placeholder="Notes"></textarea>
+    <input type="text" id="symptom_type" placeholder="Symptom Type (e.g., Headache)" required>
+    <input type="text" id="severity" placeholder="Severity (e.g., Mild, Severe)" required>
+    <textarea id="notes" placeholder="Notes (optional)"></textarea>
     <input type="date" id="date" required>
     <button type="submit">Add Symptom</button>
   </form>
@@ -53,65 +53,103 @@
   const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
   async function loadSymptoms() {
-    const res = await fetch(`${apiBase}/symptoms`, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const symptoms = await res.json();
-    const tbody = document.getElementById('symptom-table');
-    tbody.innerHTML = '';
-    symptoms.forEach(s => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${s.symptom_type}</td>
-          <td>${s.severity}</td>
-          <td>${s.notes || ''}</td>
-          <td>${s.date}</td>
-          <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
-        </tr>`;
-    });
+    try {
+      const res = await fetch(`${apiBase}/symptoms`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!res.ok) {
+        alert('Failed to load symptoms');
+        return;
+      }
+
+      const symptoms = await res.json();
+      const tbody = document.getElementById('symptom-table');
+      tbody.innerHTML = '';
+
+      symptoms.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${s.symptom_type}</td>
+            <td>${s.severity}</td>
+            <td>${s.notes || ''}</td>
+            <td>${s.date}</td>
+            <td>
+              <button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    } catch (error) {
+      console.error('Error loading symptoms:', error);
+      alert('Network error while loading symptoms');
+    }
   }
 
   document.getElementById('symptom-form').addEventListener('submit', async e => {
     e.preventDefault();
-    const payload = {
-      symptom_type: document.getElementById('symptom_type').value,
-      severity: document.getElementById('severity').value,
-      notes: document.getElementById('notes').value,
-      date: document.getElementById('date').value
-    };
-    const res = await fetch(`${apiBase}/symptoms`, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (res.ok) {
-      alert('Symptom added');
-      document.getElementById('symptom-form').reset();
-      loadSymptoms();
-    } else {
-      alert('Failed to add symptom');
+
+    const symptom_type = document.getElementById('symptom_type').value.trim();
+    const severity = document.getElementById('severity').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    const date = document.getElementById('date').value;
+
+    if (!symptom_type || !severity || !date) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    const payload = { symptom_type, severity, notes, date };
+
+    try {
+      const res = await fetch(`${apiBase}/symptoms`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        alert('Symptom added successfully');
+        document.getElementById('symptom-form').reset();
+        loadSymptoms();
+      } else {
+        const errorData = await res.json();
+        alert('Failed to add symptom: ' + (errorData.detail || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Network error while adding symptom');
     }
   });
 
   async function deleteSymptom(id) {
-    const res = await fetch(`${apiBase}/symptoms/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    if (res.ok) {
-      alert('Symptom deleted');
-      loadSymptoms();
-    } else {
-      alert('Failed to delete');
+    if (!confirm('Are you sure you want to delete this symptom?')) return;
+
+    try {
+      const res = await fetch(`${apiBase}/symptoms/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        alert('Symptom deleted');
+        loadSymptoms();
+      } else {
+        alert('Failed to delete symptom');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Network error while deleting symptom');
     }
   }
 
   function logout() {
     localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
   }
-
 
   loadSymptoms();
 </script>
