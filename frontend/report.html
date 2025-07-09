@@ -24,16 +24,26 @@
   <h1>Full Health Report</h1>
 
   <h2>Medications</h2>
-  <table><thead><tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Time Slots</th><th>Start</th><th>End</th><th>Status</th></tr></thead><tbody id="meds-table"></tbody></table>
+  <table>
+    <thead><tr><th>Name</th><th>Dosage</th><th>Frequency</th><th>Time Slots</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+    <tbody id="meds-table"></tbody>
+  </table>
 
   <h2>Symptoms</h2>
-  <table><thead><tr><th>Date</th><th>Type</th><th>Severity</th><th>Notes</th></tr></thead><tbody id="symptoms-table"></tbody></table>
+  <table>
+    <thead><tr><th>Date</th><th>Type</th><th>Severity</th><th>Notes</th></tr></thead>
+    <tbody id="symptoms-table"></tbody>
+  </table>
 
   <h2>Vitals</h2>
-  <table><thead><tr><th>Date</th><th>BP</th><th>Heart Rate</th><th>Temperature</th></tr></thead><tbody id="vitals-table"></tbody></table>
+  <table>
+    <thead><tr><th>Date</th><th>BP</th><th>Heart Rate</th><th>Temperature</th></tr></thead>
+    <tbody id="vitals-table"></tbody>
+  </table>
 
-  <h2>Health Trend</h2>
-  <canvas id="healthChart"></canvas>
+  <h2>Health Over Time</h2>
+  <canvas id="healthChart" width="600" height="300"></canvas>
+
 </main>
 
 <script>
@@ -42,9 +52,14 @@
 
   const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
+  async function loadFullReport() {
+    await loadMeds();
+    await loadSymptoms();
+    await loadVitals();
+  }
+
   async function loadMeds() {
     const res = await fetch(`${apiBase}/medications`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!res.ok) return;
     const meds = await res.json();
     document.getElementById('meds-table').innerHTML = meds.map(m => `
       <tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td><td>${m.time_slots}</td><td>${m.start_date}</td><td>${m.end_date}</td><td>${m.taken ? '✅' : '❌'}</td></tr>
@@ -53,7 +68,6 @@
 
   async function loadSymptoms() {
     const res = await fetch(`${apiBase}/symptoms`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!res.ok) return;
     const syms = await res.json();
     document.getElementById('symptoms-table').innerHTML = syms.map(s => `
       <tr><td>${s.date}</td><td>${s.symptom_type}</td><td>${s.severity}</td><td>${s.notes || ''}</td></tr>
@@ -62,36 +76,32 @@
 
   async function loadVitals() {
     const res = await fetch(`${apiBase}/vitals`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (!res.ok) return;
     const vits = await res.json();
-    const tbody = document.getElementById('vitals-table');
-    tbody.innerHTML = vits.map(v => `
+    document.getElementById('vitals-table').innerHTML = vits.map(v => `
       <tr><td>${v.date}</td><td>${v.blood_pressure || '-'}</td><td>${v.heart_rate || '-'}</td><td>${v.temperature || '-'}</td></tr>
     `).join('') || '<tr><td colspan="4">No vitals.</td></tr>';
 
-    drawHealthGraph(vits);
+    drawHealthChart(vits);
   }
 
-  function drawHealthGraph(vitals) {
-    const ctx = document.getElementById('healthChart').getContext('2d');
-    const labels = vitals.map(v => v.date);
-    const heartRates = vitals.map(v => v.heart_rate || 0);
+  function drawHealthChart(vitals) {
+    const dates = vitals.map(v => v.date);
+    const temperatures = vitals.map(v => parseFloat(v.temperature) || 0);
 
+    const ctx = document.getElementById('healthChart').getContext('2d');
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: labels,
+        labels: dates,
         datasets: [{
-          label: 'Heart Rate Over Time',
-          data: heartRates,
-          borderWidth: 2,
+          label: 'Temperature Over Time',
+          data: temperatures,
           fill: false,
-          tension: 0.2
+          tension: 0.1
         }]
       },
       options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } }
+        responsive: true
       }
     });
   }
@@ -99,12 +109,6 @@
   function logout() {
     localStorage.clear();
     window.location.href = 'index.html';
-  }
-
-  async function loadFullReport() {
-    await loadMeds();
-    await loadSymptoms();
-    await loadVitals();
   }
 
   loadFullReport();
