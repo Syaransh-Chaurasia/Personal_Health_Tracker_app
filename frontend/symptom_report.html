@@ -46,25 +46,41 @@
     const res = await fetch(`${apiBase}/symptoms`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return alert('Failed to load symptom report');
-    const symptoms = await res.json();
 
+    if (res.status === 401) {
+      alert('Session expired. Please log in again.');
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      alert('Failed to load symptom report');
+      return;
+    }
+
+    const symptoms = await res.json();
     const tbody = document.getElementById('symptom-report-table');
     tbody.innerHTML = '';
+
+    if (symptoms.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">No symptoms found.</td></tr>';
+      return;
+    }
+
     symptoms.forEach(s => {
       tbody.innerHTML += `
       <tr>
         <td>${s.date}</td>
         <td>${s.symptom_type}</td>
         <td>${s.severity}</td>
-        <td>${s.notes || ''}</td>
-      </tr>
-    `;
+        <td>${s.notes || '-'}</td>
+      </tr>`;
     });
   }
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
   }
 

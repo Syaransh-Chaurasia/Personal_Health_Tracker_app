@@ -49,9 +49,19 @@
     const res = await fetch(`${apiBase}/medications`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return alert('Failed to load medication report');
-    const meds = await res.json();
 
+    if (res.status === 401) {
+      alert('Session expired. Please log in again.');
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      alert('Failed to load medication report');
+      return;
+    }
+
+    const meds = await res.json();
     const tbody = document.getElementById('med-report-table');
     tbody.innerHTML = '';
     meds.forEach(m => {
@@ -64,13 +74,13 @@
         <td>${m.start_date}</td>
         <td>${m.end_date}</td>
         <td>${m.taken ? '✅' : '❌'}</td>
-      </tr>
-    `;
+      </tr>`;
     });
   }
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
   }
 

@@ -100,7 +100,9 @@
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
+
   }
 
   loadFullReport();

@@ -46,11 +46,27 @@
     const res = await fetch(`${apiBase}/vitals`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!res.ok) return alert('Failed to load vitals report');
-    const vitals = await res.json();
 
+    if (res.status === 401) {
+      alert('Session expired. Please log in again.');
+      logout();
+      return;
+    }
+
+    if (!res.ok) {
+      alert('Failed to load vitals report');
+      return;
+    }
+
+    const vitals = await res.json();
     const tbody = document.getElementById('vitals-report-table');
     tbody.innerHTML = '';
+
+    if (vitals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">No vitals recorded.</td></tr>';
+      return;
+    }
+
     vitals.forEach(v => {
       tbody.innerHTML += `
       <tr>
@@ -58,13 +74,13 @@
         <td>${v.blood_pressure || '-'}</td>
         <td>${v.heart_rate || '-'}</td>
         <td>${v.temperature || '-'}</td>
-      </tr>
-    `;
+      </tr>`;
     });
   }
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
   }
 
