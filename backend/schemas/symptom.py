@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import date
 from typing import Optional
+from datetime import date
 
 class SymptomCreate(BaseModel):
     date: date
@@ -18,4 +18,4 @@ class SymptomOut(SymptomCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
