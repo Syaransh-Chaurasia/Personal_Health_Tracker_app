@@ -1,7 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
 from datetime import date
-
 
 class MedicationBase(BaseModel):
     name: str
@@ -11,18 +9,15 @@ class MedicationBase(BaseModel):
     start_date: date
     end_date: date
 
-
 class MedicationCreate(MedicationBase):
     pass
 
-
 class MedicationUpdate(BaseModel):
     taken: bool
-
 
 class MedicationOut(MedicationBase):
     id: int
     taken: bool
 
     class Config:
-        from_attributes = True  # Pydantic v2 equivalent of orm_mode=True
+        from_attributes = True  # For Pydantic v2

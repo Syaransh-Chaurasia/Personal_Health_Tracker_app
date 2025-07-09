@@ -62,12 +62,6 @@
         const res = await fetch(`${apiBase}/medications`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
-
-        if (!res.ok) {
-            alert('Failed to load medications');
-            return;
-        }
-
         const meds = await res.json();
         const tbody = document.getElementById('medication-table');
         tbody.innerHTML = meds.map(m => `
@@ -92,16 +86,13 @@
     }
 
     async function toggleTaken(id, currentStatus) {
-        const res = await fetch(`${apiBase}/medications/${id}`, {
+        const res = await fetch(`${apiBase}/medications/${id}/status`, {
             method: 'PUT',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify({ taken: !currentStatus })
         });
-        if (res.ok) {
-            loadMedications();
-        } else {
-            alert('Failed to update status');
-        }
+        if (res.ok) loadMedications();
+        else alert('Failed to update status');
     }
 
     async function deleteMedication(id) {
@@ -109,11 +100,8 @@
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + token }
         });
-        if (res.ok) {
-            loadMedications();
-        } else {
-            alert('Failed to delete medication');
-        }
+        if (res.ok) loadMedications();
+        else alert('Failed to delete medication');
     }
 
     document.getElementById('medication-form').addEventListener('submit', async e => {

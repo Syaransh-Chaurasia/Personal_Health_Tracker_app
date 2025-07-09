@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from backend.database import Base
 
 class Medication(Base):
@@ -12,4 +12,4 @@ class Medication(Base):
     time_slots = Column(String, nullable=False)
     start_date = Column(String, nullable=False)
     end_date = Column(String, nullable=False)
-    taken = Column(Boolean, default=False)  # ✅ New field
+    taken = Column(Boolean, default=False)
