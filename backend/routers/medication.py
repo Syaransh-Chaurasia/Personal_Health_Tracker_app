@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from backend import schemas, models
+from backend.schemas import medication as schemas
 from backend.database import get_db
 from backend.auth import get_current_user
 

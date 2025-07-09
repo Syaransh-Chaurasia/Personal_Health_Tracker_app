@@ -1,29 +1,24 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 
 class MedicationBase(BaseModel):
-    name: Optional[str] = None
-    dosage: Optional[str] = None
-    frequency: Optional[str] = None
-    time_slots: Optional[str] = None
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    taken: Optional[bool] = False  # ✅ Include this
-
-class MedicationCreate(MedicationBase):
     name: str
     dosage: str
     frequency: str
     time_slots: str
-    start_date: str
-    end_date: str
+    start_date: date
+    end_date: date
+    taken: Optional[bool] = False
 
-class MedicationUpdate(BaseModel):
-    taken: bool  # ✅ Only used for toggling status
+class MedicationCreate(MedicationBase):
+    pass
+
+class MedicationUpdate(MedicationBase):
+    pass
 
 class MedicationOut(MedicationBase):
     id: int
-    user_id: int
 
     class Config:
-        from_attributes = True  # ✅ Required for FastAPI v2+
+        from_attributes = True  # Use this for Pydantic v2+
