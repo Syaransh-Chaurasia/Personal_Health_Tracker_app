@@ -53,7 +53,6 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = 'index.html';
-
     const apiBase = 'https://personal-health-tracker-app-2.onrender.com';
 
     async function loadMedications() {
@@ -62,21 +61,16 @@
         });
         const meds = await res.json();
         const tbody = document.getElementById('medication-table');
-        tbody.innerHTML = '';
-        meds.forEach(m => {
-            tbody.innerHTML += `
-        <tr>
-          <td>${m.name}</td>
-          <td>${m.dosage}</td>
-          <td>${m.frequency}</td>
-          <td>${m.time_slots}</td>
-          <td>${m.start_date}</td>
-          <td>${m.end_date}</td>
-          <td>
-            <button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button>
-          </td>
-        </tr>`;
-        });
+        tbody.innerHTML = meds.map(m => `
+      <tr>
+        <td>${m.name}</td>
+        <td>${m.dosage}</td>
+        <td>${m.frequency}</td>
+        <td>${m.time_slots}</td>
+        <td>${m.start_date}</td>
+        <td>${m.end_date}</td>
+        <td><button onclick="deleteMedication(${m.id})" style="background-color:red;">Delete</button></td>
+      </tr>`).join('');
     }
 
     document.getElementById('medication-form').addEventListener('submit', async e => {
@@ -121,7 +115,6 @@
         localStorage.removeItem('user_id');
         window.location.href = 'index.html';
     }
-
 
     loadMedications();
 </script>

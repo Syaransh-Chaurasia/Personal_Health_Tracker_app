@@ -1,11 +1,11 @@
-from sqlalchemy import Column, Integer, Float, Date, String, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from backend.database import Base
 
 class Vitals(Base):
-    __tablename__ = "vitals"
+    __tablename__ = 'vitals'
     id = Column(Integer, primary_key=True, index=True)
+    blood_pressure = Column(String, nullable=False)
+    heart_rate = Column(String, nullable=False)
+    temperature = Column(String, nullable=False)
     date = Column(Date, nullable=False)
-    temperature = Column(Float, nullable=True)
-    blood_pressure = Column(String, nullable=True)
-    heart_rate = Column(Integer, nullable=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)

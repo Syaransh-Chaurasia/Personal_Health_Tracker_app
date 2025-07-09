@@ -50,22 +50,11 @@
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    if (res.status === 401) {
-      alert('Session expired. Please log in again.');
-      logout();
-      return;
-    }
-
-    if (!res.ok) {
-      alert('Failed to load medication report');
-      return;
-    }
+    if (res.status === 401) return logout();
 
     const meds = await res.json();
     const tbody = document.getElementById('med-report-table');
-    tbody.innerHTML = '';
-    meds.forEach(m => {
-      tbody.innerHTML += `
+    tbody.innerHTML = meds.length ? meds.map(m => `
       <tr>
         <td>${m.name}</td>
         <td>${m.dosage}</td>
@@ -74,13 +63,12 @@
         <td>${m.start_date}</td>
         <td>${m.end_date}</td>
         <td>${m.taken ? '✅' : '❌'}</td>
-      </tr>`;
-    });
+      </tr>
+    `).join('') : '<tr><td colspan="7">No medications found.</td></tr>';
   }
 
   function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
+    localStorage.clear();
     window.location.href = 'index.html';
   }
 

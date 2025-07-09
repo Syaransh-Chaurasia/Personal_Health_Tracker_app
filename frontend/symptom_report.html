@@ -47,40 +47,22 @@
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
-    if (res.status === 401) {
-      alert('Session expired. Please log in again.');
-      logout();
-      return;
-    }
-
-    if (!res.ok) {
-      alert('Failed to load symptom report');
-      return;
-    }
+    if (res.status === 401) return logout();
 
     const symptoms = await res.json();
     const tbody = document.getElementById('symptom-report-table');
-    tbody.innerHTML = '';
-
-    if (symptoms.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4">No symptoms found.</td></tr>';
-      return;
-    }
-
-    symptoms.forEach(s => {
-      tbody.innerHTML += `
+    tbody.innerHTML = symptoms.length ? symptoms.map(s => `
       <tr>
         <td>${s.date}</td>
         <td>${s.symptom_type}</td>
         <td>${s.severity}</td>
         <td>${s.notes || '-'}</td>
-      </tr>`;
-    });
+      </tr>
+    `).join('') : '<tr><td colspan="4">No symptoms recorded.</td></tr>';
   }
 
   function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
+    localStorage.clear();
     window.location.href = 'index.html';
   }
 

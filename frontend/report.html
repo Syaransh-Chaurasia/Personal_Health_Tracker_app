@@ -45,64 +45,35 @@
   }
 
   async function loadMeds() {
-    const res = await fetch(`${apiBase}/medications`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch(`${apiBase}/medications`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (!res.ok) return;
     const meds = await res.json();
-    const tbody = document.getElementById('meds-table');
-    tbody.innerHTML = meds.map(m => `
-    <tr>
-      <td>${m.name}</td>
-      <td>${m.dosage}</td>
-      <td>${m.frequency}</td>
-      <td>${m.time_slots}</td>
-      <td>${m.start_date}</td>
-      <td>${m.end_date}</td>
-      <td>${m.taken ? '✅' : '❌'}</td>
-    </tr>
-  `).join('');
+    document.getElementById('meds-table').innerHTML = meds.map(m => `
+      <tr><td>${m.name}</td><td>${m.dosage}</td><td>${m.frequency}</td><td>${m.time_slots}</td><td>${m.start_date}</td><td>${m.end_date}</td><td>${m.taken ? '✅' : '❌'}</td></tr>
+    `).join('') || '<tr><td colspan="7">No medications.</td></tr>';
   }
 
   async function loadSymptoms() {
-    const res = await fetch(`${apiBase}/symptoms`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch(`${apiBase}/symptoms`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (!res.ok) return;
     const syms = await res.json();
-    const tbody = document.getElementById('symptoms-table');
-    tbody.innerHTML = syms.map(s => `
-    <tr>
-      <td>${s.date}</td>
-      <td>${s.symptom_type}</td>
-      <td>${s.severity}</td>
-      <td>${s.notes || ''}</td>
-    </tr>
-  `).join('');
+    document.getElementById('symptoms-table').innerHTML = syms.map(s => `
+      <tr><td>${s.date}</td><td>${s.symptom_type}</td><td>${s.severity}</td><td>${s.notes || ''}</td></tr>
+    `).join('') || '<tr><td colspan="4">No symptoms.</td></tr>';
   }
 
   async function loadVitals() {
-    const res = await fetch(`${apiBase}/vitals`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await fetch(`${apiBase}/vitals`, { headers: { 'Authorization': `Bearer ${token}` } });
     if (!res.ok) return;
     const vits = await res.json();
-    const tbody = document.getElementById('vitals-table');
-    tbody.innerHTML = vits.map(v => `
-    <tr>
-      <td>${v.date}</td>
-      <td>${v.blood_pressure || '-'}</td>
-      <td>${v.heart_rate || '-'}</td>
-      <td>${v.temperature || '-'}</td>
-    </tr>
-  `).join('');
+    document.getElementById('vitals-table').innerHTML = vits.map(v => `
+      <tr><td>${v.date}</td><td>${v.blood_pressure || '-'}</td><td>${v.heart_rate || '-'}</td><td>${v.temperature || '-'}</td></tr>
+    `).join('') || '<tr><td colspan="4">No vitals.</td></tr>';
   }
 
   function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user_id');
+    localStorage.clear();
     window.location.href = 'index.html';
-
   }
 
   loadFullReport();

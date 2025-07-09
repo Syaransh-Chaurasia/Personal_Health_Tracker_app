@@ -58,17 +58,14 @@
         });
         const vitals = await res.json();
         const tbody = document.getElementById('vitals-table');
-        tbody.innerHTML = '';
-        vitals.forEach(v => {
-            tbody.innerHTML += `
-        <tr>
-          <td>${v.blood_pressure}</td>
-          <td>${v.heart_rate}</td>
-          <td>${v.temperature}</td>
-          <td>${v.date}</td>
-          <td><button onclick="deleteVitals(${v.id})" style="background-color:red;">Delete</button></td>
-        </tr>`;
-        });
+        tbody.innerHTML = vitals.map(v => `
+      <tr>
+        <td>${v.blood_pressure}</td>
+        <td>${v.heart_rate}</td>
+        <td>${v.temperature}</td>
+        <td>${v.date}</td>
+        <td><button onclick="deleteVitals(${v.id})" style="background-color:red;">Delete</button></td>
+      </tr>`).join('');
     }
 
     document.getElementById('vitals-form').addEventListener('submit', async e => {
@@ -102,7 +99,7 @@
             alert('Vitals deleted');
             loadVitals();
         } else {
-            alert('Failed to delete');
+            alert('Failed to delete vitals');
         }
     }
 
@@ -110,7 +107,6 @@
         localStorage.removeItem('token');
         localStorage.removeItem('user_id');
         window.location.href = 'index.html';
-
     }
 
     loadVitals();

@@ -23,7 +23,7 @@
   <h1>Symptom Tracker</h1>
 
   <form id="symptom-form">
-    <input type="text" id="symptom_type" placeholder="Type" required>
+    <input type="text" id="symptom_type" placeholder="Symptom Type" required>
     <input type="text" id="severity" placeholder="Severity" required>
     <textarea id="notes" placeholder="Notes (optional)"></textarea>
     <input type="date" id="date" required>
@@ -56,21 +56,16 @@
     const res = await fetch(`${apiBase}/symptoms`, {
       headers: { 'Authorization': 'Bearer ' + token }
     });
-    if (!res.ok) return alert('Failed to load symptoms');
     const symptoms = await res.json();
     const tbody = document.getElementById('symptom-table');
-    tbody.innerHTML = '';
-    symptoms.forEach(s => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${s.date}</td>
-          <td>${s.symptom_type}</td>
-          <td>${s.severity}</td>
-          <td>${s.notes || ''}</td>
-          <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
-        </tr>
-      `;
-    });
+    tbody.innerHTML = symptoms.map(s => `
+      <tr>
+        <td>${s.date}</td>
+        <td>${s.symptom_type}</td>
+        <td>${s.severity}</td>
+        <td>${s.notes || ''}</td>
+        <td><button onclick="deleteSymptom(${s.id})" style="background-color:red;">Delete</button></td>
+      </tr>`).join('');
   }
 
   document.getElementById('symptom-form').addEventListener('submit', async e => {
@@ -104,12 +99,13 @@
       alert('Symptom deleted');
       loadSymptoms();
     } else {
-      alert('Failed to delete');
+      alert('Failed to delete symptom');
     }
   }
 
   function logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     window.location.href = 'index.html';
   }
 
