@@ -25,6 +25,10 @@
 
     <form id="register-form">
         <div class="form-group">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" required>
         </div>
@@ -43,6 +47,7 @@
 <script>
     document.getElementById('register-form').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
         const messageBox = document.getElementById('message-box');
@@ -50,7 +55,7 @@
         const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ name, email, password })
         });
 
         if (res.ok) {
