@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import user
@@ -23,3 +24,8 @@ app.add_middleware(
 )
 
 app.include_router(user.router)
+
+print("EMAIL_SENDER:", os.getenv("EMAIL_SENDER"))
+print("EMAIL_PASSWORD:", os.getenv("EMAIL_PASSWORD"))
+print("SMTP_SERVER:", os.getenv("SMTP_SERVER"))
+print("SMTP_PORT:", os.getenv("SMTP_PORT"))
