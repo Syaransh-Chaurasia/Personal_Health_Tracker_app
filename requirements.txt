@@ -8,4 +8,5 @@ aiofiles
 psycopg2-binary
 passlib[bcrypt]
 python-jose
+fastapi-mail
 
