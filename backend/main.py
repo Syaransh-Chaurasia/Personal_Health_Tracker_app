@@ -16,10 +16,11 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_origins=origins,          # allow your frontend URLs
+    allow_credentials=True,         # if your frontend sends cookies/auth headers
+    allow_methods=["*"],            # allow all HTTP methods like POST, GET, OPTIONS
+    allow_headers=["*"],            # allow all headers like Content-Type, Authorization
 )
+
 
 app.include_router(user.router)
