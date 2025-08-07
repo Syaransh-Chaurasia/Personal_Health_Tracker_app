@@ -26,6 +26,7 @@ def register_user(
         background_tasks: BackgroundTasks,
         db: Session = Depends(get_db)
 ):
+    print("Incoming register request:", request.dict())  # Add this line
     existing_user = db.query(User).filter(User.email == request.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
