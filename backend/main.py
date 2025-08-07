@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user.router)
-app.include_router(symptom.router)
-app.include_router(medication.router)
-app.include_router(vitals.router)
+app.include_router(user.router, prefix="/user")
+app.include_router(symptom.router, prefix="/symptom")
+app.include_router(medication.router, prefix="/medication")
+app.include_router(vitals.router, prefix="/vitals")

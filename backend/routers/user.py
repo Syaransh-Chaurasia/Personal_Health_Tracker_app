@@ -1,37 +1,40 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
-from backend.dependencies import get_db
-from backend.models.user import User
-from backend.schemas.user import UserCreate, UserOut
-from backend.auth import get_password_hash, verify_password, create_access_token
-from backend.utils.email import send_welcome_email
+from backend.database import get_db
+from backend.email_utils import send_welcome_email
+from backend.models import User  # Assuming your SQLAlchemy User model is here
+from passlib.context import CryptContext
 
-router = APIRouter(prefix="/user", tags=["User"])
+router = APIRouter()
 
-@router.post("/register", response_model=UserOut)
-def register(user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter_by(email=user.email).first()
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    name: str
+    password: str
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+@router.post("/register", status_code=status.HTTP_201_CREATED)
+async def register_user(user: UserCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    # Check if user exists
+    existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Create user instance
     hashed_password = get_password_hash(user.password)
-    new_user = User(email=user.email, password=hashed_password)
-    db.add(new_user)
+    db_user = User(email=user.email, name=user.name, hashed_password=hashed_password)
+
+    # Save to DB
+    db.add(db_user)
     db.commit()
-    db.refresh(new_user)
+    db.refresh(db_user)
 
-    background_tasks.add_task(send_welcome_email, user.email)
+    # Send welcome email asynchronously
+    background_tasks.add_task(send_welcome_email, user.email, user.name)
 
-    return new_user
-
-@router.post("/login")
-def login(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter_by(email=user.email).first()
-    if not db_user or not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
-    token = create_access_token({"sub": db_user.email})
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user_id": db_user.id
-    }
+    return {"msg": "User registered successfully. Welcome email sent!"}
