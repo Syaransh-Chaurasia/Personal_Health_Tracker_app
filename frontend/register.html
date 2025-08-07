@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Register</title>
-    <link rel="stylesheet" href="static/register.css">
+    <link rel="stylesheet" href="static/register.css" />
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
     <div id="message-box"></div>
 
-    <form id="register-form">
+    <form id="register-form" netlify="false">
         <div class="form-group">
             <label for="name">Name:</label>
             <input type="text" id="name" required />
@@ -45,24 +45,31 @@
 </main>
 
 <script>
-    document.getElementById('register-form').addEventListener('submit', async function(e) {
+    document.getElementById('register-form').addEventListener('submit', async function (e) {
         e.preventDefault();
         const name = document.getElementById('name').value.trim();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value.trim();
         const messageBox = document.getElementById('message-box');
 
-        const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
+        try {
+            const res = await fetch('https://personal-health-tracker-app-2.onrender.com/user/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
 
-        if (res.ok) {
-            messageBox.innerHTML = '<div class="alert alert-success">Registration successful! Redirecting...</div>';
-            setTimeout(() => window.location.href = 'login.html', 1500);
-        } else {
-            messageBox.innerHTML = '<div class="alert alert-danger">Registration failed. Try a different email.</div>';
+            const data = await res.json();
+
+            if (res.ok) {
+                messageBox.innerHTML = '<div class="alert alert-success">Registration successful! Redirecting...</div>';
+                setTimeout(() => window.location.href = 'login.html', 1500);
+            } else {
+                messageBox.innerHTML = `<div class="alert alert-danger">Error: ${data.detail || 'Registration failed'}</div>`;
+            }
+        } catch (err) {
+            messageBox.innerHTML = `<div class="alert alert-danger">Network error: ${err.message}</div>`;
+            console.error(err);
         }
     });
 </script>

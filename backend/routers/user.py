@@ -7,7 +7,7 @@ import os
 from backend.dependencies import get_db
 from backend.models.user import User
 from backend.auth import get_password_hash, verify_password, create_access_token
-from backend.auth_helpers import send_welcome_email  # check filename exactly
+from backend.auth_helpers import send_welcome_email  # Optional but referenced
 
 router = APIRouter(prefix="/user", tags=["User"])
 
