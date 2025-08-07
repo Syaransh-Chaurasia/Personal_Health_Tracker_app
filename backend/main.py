@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routers import user, symptom, medication, vitals
@@ -8,8 +11,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 origins = [
-    "https://reliable-cheesecake-01ebcf.netlify.app",  # ✅ Your Netlify frontend
-    "http://localhost:3000",  # ✅ Optional for local dev
+    "https://reliable-cheesecake-01ebcf.netlify.app",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
