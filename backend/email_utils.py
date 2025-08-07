@@ -8,9 +8,9 @@ conf = ConnectionConfig(
     MAIL_FROM=os.getenv("EMAIL_SENDER"),
     MAIL_PORT=int(os.getenv("SMTP_PORT", 587)),
     MAIL_SERVER=os.getenv("SMTP_SERVER"),
-    MAIL_FROM_NAME="Your App Name",
-    MAIL_STARTTLS=True,     # updated from MAIL_TLS
-    MAIL_SSL_TLS=False,     # updated from MAIL_SSL
+    MAIL_FROM_NAME="Personal Health Tracker",
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True,
 )
@@ -24,4 +24,8 @@ async def send_welcome_email(email: EmailStr, username: str):
     )
 
     fm = FastMail(conf)
-    await fm.send_message(message)
+    try:
+        await fm.send_message(message)
+        print(f"✅ Welcome email sent to {email}")
+    except Exception as e:
+        print(f"❌ Failed to send welcome email to {email}: {e}")

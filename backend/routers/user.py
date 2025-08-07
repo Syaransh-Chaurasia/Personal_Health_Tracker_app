@@ -7,7 +7,7 @@ import os
 from backend.dependencies import get_db
 from backend.models.user import User
 from backend.auth import get_password_hash, verify_password, create_access_token
-from backend.auth_helpers import send_welcome_email  # Optional but referenced
+from backend.email_utils import send_welcome_email  # Updated import
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -21,12 +21,11 @@ class LoginRequest(BaseModel):
     password: str
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register_user(
+async def register_user(
         request: RegisterRequest,
         background_tasks: BackgroundTasks,
         db: Session = Depends(get_db)
 ):
-    print("Incoming register request:", request.dict())  # Add this line
     existing_user = db.query(User).filter(User.email == request.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -37,6 +36,7 @@ def register_user(
     db.commit()
     db.refresh(new_user)
 
+    # Add email sending as background async task
     background_tasks.add_task(send_welcome_email, new_user.email, new_user.name)
 
     return {"message": "User registered successfully"}
