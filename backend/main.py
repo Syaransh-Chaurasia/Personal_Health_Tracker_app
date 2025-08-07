@@ -4,23 +4,29 @@ from backend.routers import user
 from backend.database import Base, engine
 from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
+
+# Create all tables based on Base metadata (if not exists)
 Base.metadata.create_all(bind=engine)
 
+# Initialize FastAPI app
 app = FastAPI()
 
+# Allowed origins for CORS (adjust as needed)
 origins = [
     "http://localhost:3000",
     "https://reliable-cheesecake-01ebcf.netlify.app"
 ]
 
+# Add CORS middleware to handle cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,          # allow your frontend URLs
-    allow_credentials=True,         # if your frontend sends cookies/auth headers
-    allow_methods=["*"],            # allow all HTTP methods like POST, GET, OPTIONS
-    allow_headers=["*"],            # allow all headers like Content-Type, Authorization
+    allow_origins=origins,          # Frontend URLs allowed to access the API
+    allow_credentials=True,         # Allow cookies, authorization headers
+    allow_methods=["*"],            # Allow all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],            # Allow all headers
 )
 
-
+# Include your user router
 app.include_router(user.router)
